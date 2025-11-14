@@ -65,6 +65,11 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                 .map(this::toPrologProvides)
                 .collect(Collectors.toList());
 
+        List<Term> allPackages = e.getEnclosedElements().stream()
+                .filter(element -> element.getKind() == PACKAGE)
+                .map(element -> new Atom(((PackageElement) element).getQualifiedName().toString()))
+                .collect(Collectors.toList());
+
         Atom moduleNameAtom = new Atom(moduleName);
         Fact moduleFact = new Fact("module",
                 moduleNameAtom,
@@ -72,7 +77,8 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                 new PrologList(requires),
                 new PrologList(exports),
                 new PrologList(uses),
-                new PrologList(provides)
+                new PrologList(provides),
+                new PrologList(allPackages) // New argument: all_packages
         );
         writer.writeModuleSummaryFile(moduleName, moduleFact);
         indexModuleList.add(moduleNameAtom);

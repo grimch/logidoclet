@@ -3,13 +3,14 @@
 predicate_info(index, arity(1)).
 argument_info(index, 1, modules, type(list(module_name))).
 
-predicate_info(module, arity(6)).
+predicate_info(module, arity(7)).
 argument_info(module, 1, name, type(module_name)).
 argument_info(module, 2, modifiers, type(list(modifier))). % e.g., 'open'
 argument_info(module, 3, requires, type(list(requires))).
 argument_info(module, 4, exports, type(list(exports))).
 argument_info(module, 5, uses, type(list(type))). % Services consumed
 argument_info(module, 6, provides, type(list(provides))). % Services offered
+argument_info(module, 7, all_packages, type(list(package_name))).
 
 predicate_info(requires, arity(3)).
 argument_info(requires, 1, modifiers, type(list(modifier))). % e.g., 'transitive', 'static'

@@ -10,8 +10,10 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Locale;
 import java.util.Set;
 
@@ -125,9 +127,47 @@ public class LogiDoclet implements Doclet {
             return false;
         }
 
-        reporter.print(Diagnostic.Kind.NOTE, "Generating Prolog facts to: " + outputDirectory.toAbsolutePath());
+        // Ensure the base output directory exists
+        try {
+            Files.createDirectories(outputDirectory);
+        } catch (IOException e) {
+            reporter.print(Diagnostic.Kind.ERROR, "Error creating output directory: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
 
-        DocletPrologWriter writer = new DocletPrologWriter(outputDirectory);
+        // Copy gemini.md and java_metastructure.pl from resources to the root output directory
+        try (java.io.InputStream geminiMdStream = LogiDoclet.class.getClassLoader().getResourceAsStream("gemini.md");
+             java.io.InputStream javaMetastructureStream = LogiDoclet.class.getClassLoader().getResourceAsStream("java_metastructure.pl")) {
+
+            if (geminiMdStream == null) {
+                reporter.print(Diagnostic.Kind.ERROR, "Resource 'gemini.md' not found in classpath.");
+                return false;
+            }
+            if (javaMetastructureStream == null) {
+                reporter.print(Diagnostic.Kind.ERROR, "Resource 'java_metastructure.pl' not found in classpath.");
+                return false;
+            }
+
+            Files.copy(geminiMdStream, outputDirectory.resolve("gemini.md"), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(javaMetastructureStream, outputDirectory.resolve("java_metastructure.pl"), StandardCopyOption.REPLACE_EXISTING);
+            reporter.print(Diagnostic.Kind.NOTE, "Copied gemini.md and java_metastructure.pl to " + outputDirectory.toAbsolutePath());
+        } catch (IOException e) {
+            reporter.print(Diagnostic.Kind.ERROR, "Error copying resource files: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+
+        Path actualOutputDirectory;
+        if (outputCommentary) {
+            actualOutputDirectory = outputDirectory.resolve("full");
+        } else {
+            actualOutputDirectory = outputDirectory.resolve("minimal");
+        }
+
+        reporter.print(Diagnostic.Kind.NOTE, "Generating Prolog facts to: " + actualOutputDirectory.toAbsolutePath());
+
+        DocletPrologWriter writer = new DocletPrologWriter(actualOutputDirectory);
         PrologVisitor visitor = new PrologVisitor(writer, environment, reporter, outputCommentary);
 
         try {
