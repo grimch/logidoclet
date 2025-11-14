@@ -1,0 +1,8 @@
+/target/
+/attic/
+/.gemini/
+!.mvn/wrapper/maven-wrapper.jar
+.idea
+*.iws
+*.iml
+*.ipr
