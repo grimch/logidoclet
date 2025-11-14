@@ -25,15 +25,17 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
     private final DocletPrologWriter writer;
     private final DocletEnvironment docEnv;
     private final Reporter reporter;
+    private final boolean outputCommentary; // New field
     private List<Term> indexModuleList = new ArrayList<>();
     private List<Fact> packageMembers = null;
     private List<Fact> typeMembers = null;
     private Types typeUtils; ;
 
-    public PrologVisitor(DocletPrologWriter writer, DocletEnvironment docEnv, Reporter reporter) {
+    public PrologVisitor(DocletPrologWriter writer, DocletEnvironment docEnv, Reporter reporter, boolean outputCommentary) {
         this.writer = writer;
         this.docEnv = docEnv;
         this.reporter = reporter;
+        this.outputCommentary = outputCommentary; // Initialize new field
         typeUtils = docEnv.getTypeUtils();
     }
 
@@ -43,12 +45,13 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         List<Term> requires = e.getDirectives().stream()
                 .filter(d -> d.getKind() == ModuleElement.DirectiveKind.REQUIRES)
                 .map(d -> (ModuleElement.RequiresDirective) d)
+                .filter(d -> !d.getDependency().getQualifiedName().contentEquals("java.base") || d.isTransitive() || d.isStatic()) // Only include java.base if explicitly declared with modifiers
                 .map(this::toPrologRequires)
                 .collect(Collectors.toList());
         List<Term> exports = e.getDirectives().stream()
                 .filter(d -> d.getKind() == ModuleElement.DirectiveKind.EXPORTS)
                 .map(d -> (ModuleElement.ExportsDirective) d)
-                .filter(d -> d.getTargetModules() != null)
+                .filter(d -> d.getPackage() != null)
                 .map(this::toPrologExports)
                 .collect(Collectors.toList());
         List<Term> uses = e.getDirectives().stream()
@@ -104,12 +107,11 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         String typeName = e.getSimpleName().toString();
 
         Fact typeFact = null;
-        List<Term> members = new ArrayList<>();
 
         // Visit members first to collect their facts
         for (Element member : e.getEnclosedElements()) {
             // Only visit members that are not synthetic or compiler-generated
-            if (member.getKind().isField() || member.getKind().isExecutable() ) {
+            if (member.getKind().isField() || member.getKind().isExecutable() || member.getKind() == CLASS || member.getKind() == INTERFACE || member.getKind() == ENUM || member.getKind() == RECORD || member.getKind() == ANNOTATION_TYPE) {
                 member.accept(this, p);
             }
         }
@@ -132,7 +134,8 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                             )
                         ),
                         new PrologList(new ArrayList<>(typeMembers)), // Members are collected separately
-                        toPrologAnnotationList(e.getAnnotationMirrors())
+                        toPrologAnnotationList(e.getAnnotationMirrors()),
+                        new Atom(getDocComment(e))
                 );
                 break;
             case INTERFACE:
@@ -143,7 +146,16 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                         toPrologTypeParameterList(e.getTypeParameters()),
                         toPrologImplementsList(e.getInterfaces()), // Interfaces extend other interfaces
                         new PrologList(new ArrayList<>(typeMembers)),
-                        toPrologAnnotationList(e.getAnnotationMirrors())
+                        toPrologAnnotationList(e.getAnnotationMirrors()),
+                        new PrologList(
+                            e
+                                .getPermittedSubclasses()
+                                .stream()
+                                .map(t -> new Fact("declared_type", new Atom(((TypeElement) typeUtils.asElement(t)).getQualifiedName().toString()), new PrologList(new ArrayList<>())))
+                                .collect(Collectors.toList()
+                            )
+                        ),
+                        new Atom(getDocComment(e))
                 );
                 break;
             case ENUM:
@@ -152,12 +164,9 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                         new Atom(packageName),
                         toPrologModifierList(e.getModifiers()),
                         toPrologImplementsList(e.getInterfaces()),
-                        new PrologList(e.getEnclosedElements().stream()
-                                .filter(el -> el.getKind() == ENUM_CONSTANT)
-                                .map(this::toPrologEnumConstant)
-                                .collect(Collectors.toList())),
                         new PrologList(new ArrayList<>(typeMembers)),
-                        toPrologAnnotationList(e.getAnnotationMirrors())
+                        toPrologAnnotationList(e.getAnnotationMirrors()),
+                        new Atom(getDocComment(e))
                 );
                 break;
             case ANNOTATION_TYPE:
@@ -165,12 +174,8 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                         new Atom(typeName),
                         new Atom(packageName),
                         toPrologModifierList(e.getModifiers()),
-                        new PrologList(e.getEnclosedElements().stream()
-                                .filter(el -> el.getKind() == METHOD) // Annotation members are methods
-                                .map(el -> (ExecutableElement) el)
-                                .map(this::toPrologAnnotationMember)
-                                .collect(Collectors.toList())),
-                        toPrologAnnotationList(e.getAnnotationMirrors())
+                        toPrologAnnotationList(e.getAnnotationMirrors()),
+                        new Atom(getDocComment(e))
                 );
                 break;
             case RECORD:
@@ -185,7 +190,8 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                                 .map(this::toPrologRecordComponent)
                                 .collect(Collectors.toList())),
                         new PrologList(new ArrayList<>(typeMembers)),
-                        toPrologAnnotationList(e.getAnnotationMirrors())
+                        toPrologAnnotationList(e.getAnnotationMirrors()),
+                        new Atom(getDocComment(e))
                 );
                 break;
             default:
@@ -216,7 +222,8 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                         toPrologType(e.getReturnType()),
                         toPrologParameterList(e.getParameters()),
                         toPrologThrowsList(e.getThrownTypes()),
-                        toPrologAnnotationList(e.getAnnotationMirrors())
+                        toPrologAnnotationList(e.getAnnotationMirrors()),
+                        new Atom(getDocComment(e))
                 );
                 break;
             case CONSTRUCTOR:
@@ -226,7 +233,8 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                         toPrologTypeParameterList(e.getTypeParameters()),
                         toPrologParameterList(e.getParameters()),
                         toPrologThrowsList(e.getThrownTypes()),
-                        toPrologAnnotationList(e.getAnnotationMirrors())
+                        toPrologAnnotationList(e.getAnnotationMirrors()),
+                        new Atom(getDocComment(e))
                 );
                 break;
             default:
@@ -251,7 +259,8 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                         new Atom(e.getSimpleName().toString()),
                         toPrologModifierList(e.getModifiers()),
                         toPrologType(e.asType()),
-                        toPrologAnnotationList(e.getAnnotationMirrors())
+                        toPrologAnnotationList(e.getAnnotationMirrors()),
+                        new Atom(getDocComment(e))
                 );
                 break;
             case ENUM_CONSTANT:
@@ -291,15 +300,16 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
 
     private Term toPrologExports(ModuleElement.ExportsDirective e) {
         List<Term> toModules =
-                e
-                    .getTargetModules()
-                    .stream()
-                    .map(m -> new Atom(m.getQualifiedName().toString()))
-                    .collect(Collectors.toList());
+            Optional.ofNullable(e.getTargetModules())
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(m -> new Atom(m.getQualifiedName().toString()))
+                .collect(Collectors.toList());
+
         return new Fact("exports",
-                new Atom(e.getPackage().getQualifiedName().toString()),
-                new PrologList(toModules),
-                toPrologAnnotationList(e.getPackage().getAnnotationMirrors())
+            new Atom(e.getPackage().getQualifiedName().toString()),
+            new PrologList(toModules),
+            toPrologAnnotationList(e.getPackage().getAnnotationMirrors())
         );
     }
 
@@ -316,9 +326,14 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
 
     private Term toPrologEnumConstant(Element e) {
         VariableElement enumConstant = (VariableElement) e;
+        // Extracting actual constructor arguments for enum constants is complex with the current Element API.
+        // It would typically require using the DocTree API to inspect the EnumConstantTree.
+        // For now, we provide an empty list to match the metadata arity.
+        List<Term> constructorArguments = new ArrayList<>(); // Placeholder for actual arguments
         return new Fact("enum_constant",
                 new Atom(enumConstant.getSimpleName().toString()),
-                toPrologAnnotationList(enumConstant.getAnnotationMirrors())
+                toPrologAnnotationList(enumConstant.getAnnotationMirrors()),
+                new PrologList(constructorArguments)
         );
     }
 
@@ -367,7 +382,7 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
     }
 
     private Term toPrologExtends(TypeMirror superclass) {
-        if (superclass == null || superclass.getKind() == TypeKind.NONE) {
+        if (superclass == null || superclass.getKind() == TypeKind.NONE || superclass.toString().equals("java.lang.Object")) {
             return new Atom("null");
         }
         return new Fact("extends", new Atom(superclass.getKind().toString().toLowerCase()), toPrologType(superclass));
@@ -406,6 +421,14 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
 
     private Term toPrologThrows(TypeMirror t) {
         return new Fact("throws", toPrologType(t));
+    }
+
+    private String getDocComment(Element e) {
+        if (outputCommentary) {
+            String comment = docEnv.getElementUtils().getDocComment(e);
+            return comment != null ? comment.replace("\n", "\\n").replace("\r", "") : "";
+        }
+        return "";
     }
 
     private PrologList toPrologAnnotationList(List<? extends AnnotationMirror> annotations) {
@@ -511,7 +534,7 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                 List<Term> typeArguments = t.getTypeArguments().stream()
                         .map(arg -> arg.accept(this, aVoid))
                         .collect(Collectors.toList());
-                return new Fact("type", new Atom("declared"), new Fact("declared_type", new Atom(qualifiedName), new PrologList(typeArguments)));
+                return new Fact("declared_type", new Atom(qualifiedName), new PrologList(typeArguments));
             }
 
             @Override

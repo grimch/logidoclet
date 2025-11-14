@@ -23,6 +23,7 @@ public class LogiDoclet implements Doclet {
 
     private Reporter reporter;
     private Path outputDirectory;
+    private boolean outputCommentary = false; // New field, default to false
 
     @Override
     public void init(Locale locale, Reporter reporter) {
@@ -73,6 +74,41 @@ public class LogiDoclet implements Doclet {
                         reporter.print(Diagnostic.Kind.ERROR, "Option -d requires a directory argument.");
                         return false;
                     }
+                },
+                new Option() { // New Option for outputCommentary
+                    @Override
+                    public int getArgumentCount() {
+                        return 0; // No argument needed for a boolean flag
+                    }
+
+                    @Override
+                    public String getDescription() {
+                        return "Include Javadoc comments in the Prolog output.";
+                    }
+
+                    @Override
+                    public Option.Kind getKind() {
+                        return Option.Kind.STANDARD;
+                    }
+
+                    @Override
+                    public java.util.List<String> getNames() {
+                        return java.util.List.of("-outputCommentary");
+                    }
+
+                    @Override
+                    public String getParameters() {
+                        return ""; // No parameters
+                    }
+
+                    @Override
+                    public boolean process(String option, java.util.List<String> arguments) {
+                        if (option.equals("-outputCommentary")) {
+                            outputCommentary = true;
+                            return true;
+                        }
+                        return false;
+                    }
                 }
         );
     }
@@ -92,7 +128,7 @@ public class LogiDoclet implements Doclet {
         reporter.print(Diagnostic.Kind.NOTE, "Generating Prolog facts to: " + outputDirectory.toAbsolutePath());
 
         DocletPrologWriter writer = new DocletPrologWriter(outputDirectory);
-        PrologVisitor visitor = new PrologVisitor(writer, environment, reporter);
+        PrologVisitor visitor = new PrologVisitor(writer, environment, reporter, outputCommentary);
 
         try {
             for (Element element : environment.getIncludedElements()) {

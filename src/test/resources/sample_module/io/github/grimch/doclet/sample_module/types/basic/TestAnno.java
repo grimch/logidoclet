@@ -1,4 +1,6 @@
 package io.github.grimch.doclet.sample_module.types.basic;
 
-// *** Define a dummy annotation for placement testing ***
+/**
+ * A dummy annotation used for placement testing in other classes.
+ */
 public @interface TestAnno {}

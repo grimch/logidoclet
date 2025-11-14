@@ -29,6 +29,7 @@ public class LogiDocletTest {
                 "-verbose",
                 "-doclet", LogiDoclet.class.getName(),
                 "-d", outputDir.toString(),
+                "-outputCommentary",
                 "--source-path", "src/test/resources/sample_module",
                 "-subpackages",  "io.github.grimch.doclet.sample_module"
 //                "--module", "io.github.grimch.doclet.sample_module1"
