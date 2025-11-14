@@ -117,7 +117,7 @@ public class LogiDoclet implements Doclet {
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.RELEASE_8; // Using ElementScanner8
+        return SourceVersion.RELEASE_17;
     }
 
     @Override
