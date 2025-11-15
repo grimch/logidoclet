@@ -17,12 +17,41 @@ This file defines all the Prolog predicates used, their arity (number of argumen
 
 ## 3. Step-by-Step Exploration Strategy
 
-To understand a project's structure, follow a hierarchical exploration path:
+To understand a project's structure, follow the hierarchical exploration path shown in the diagram below.
 
-*   **Start with the Index:** Begin by reading `index.pl` in the root of the output directory (e.g., `[output_dir]/minimal/index.pl` or `[output_dir]/full/index.pl`). This file contains an `index` fact listing all top-level modules.
-*   **Explore Modules:** For each module listed in `index.pl`, navigate to its corresponding `module.pl` file (e.g., `[output_dir]/minimal/[module_name]/module.pl`). This file contains the `module` fact with its directives (requires, exports, provides, uses) and, importantly, an `all_packages` argument listing *all* packages contained within that module. Use this `all_packages` list to discover all packages, not just the exported ones.
-*   **Discover Packages:** For each package listed in the `all_packages` argument of a module, navigate to its directory (e.g., `[output_dir]/minimal/[module_name]/[package_path]/`). Each package directory contains a `package.pl` file with `package_declaration` facts, listing the types declared within that package.
-*   **Analyze Types:** For each type (class, interface, enum, record, annotation_type) listed in a `package.pl` file, navigate to its dedicated `.pl` file (e.g., `[output_dir]/minimal/[package_path]/[TypeName].pl`). These files contain detailed facts about the type's modifiers, type parameters, inheritance, members (fields, methods, constructors), and annotations.
+**Important Note on Paths:** To navigate the directory structure, you must convert the dot-separated module and package names (e.g., `io.github.grimch.doclet.sample_module`) into a relative path by replacing the dots (`.`) with your filesystem's directory separator (e.g., `io/github/grimch/doclet/sample_module`).
+
+```mermaid
+sequenceDiagram
+    participant AI
+    participant FileSystem
+
+    AI->>FileSystem: Read `[output_dir]/minimal/index.pl`
+    FileSystem-->>AI: `index(['my.module'])
+
+    AI->>AI: Get module name 'my.module' and form path 'my/module'
+
+    AI->>FileSystem: Read `[output_dir]/minimal/my/module/module.pl`
+    FileSystem-->>AI: `module(..., all_packages: ['my.module.pkg1'])
+
+    AI->>AI: Get package name 'my.module.pkg1' and form path 'my/module/pkg1'
+
+    AI->>FileSystem: Read `[output_dir]/minimal/my/module/pkg1/package.pl`
+    FileSystem-->>AI: `package_declaration(..., declared_types: [type_declaration('MyClass', 'CLASS')])`
+
+    AI->>AI: Get type name 'MyClass'
+
+    AI->>FileSystem: Read `[output_dir]/minimal/my/module/pkg1/MyClass.pl`
+    FileSystem-->>AI: `class('MyClass', ...)`
+```
+
+The process is as follows:
+
+*   **Start with the Index:** Begin by reading `index.pl` to get the list of all top-level modules.
+*   **Explore Modules:** For each module, navigate to its `module.pl` file. This file contains the `all_packages` argument, which lists all packages within that module.
+*   **Discover Packages:** For each package, navigate to its `package.pl` file to find all the types declared within it.
+*   **Analyze Types:** For each type, navigate to its dedicated `.pl` file (e.g., `MyClass.pl`) to get detailed facts about its definition, members, and documentation.
+
 
 ## 4. Minimal vs. Full Output Modes
 

@@ -117,7 +117,7 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         // Visit members first to collect their facts
         for (Element member : e.getEnclosedElements()) {
             // Only visit members that are not synthetic or compiler-generated
-            if (member.getKind().isField() || member.getKind().isExecutable() || member.getKind() == CLASS || member.getKind() == INTERFACE || member.getKind() == ENUM || member.getKind() == RECORD || member.getKind() == ANNOTATION_TYPE) {
+            if (member.getKind().isField() || member instanceof ExecutableElement || member.getKind() == CLASS || member.getKind() == INTERFACE || member.getKind() == ENUM || member.getKind() == RECORD || member.getKind() == ANNOTATION_TYPE) {
                 member.accept(this, p);
             }
         }
