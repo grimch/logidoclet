@@ -1,0 +1,1 @@
+class('StaticNestedC1', 'io.github.grimch.doclet.sample_module.types.basic', [modifier(public), modifier(static)], [], 'null', [], [], [constructor('<init>', [modifier(public)], [], [], [], [], ''), field(value, [modifier(private), modifier(final)], type(primitive, int), [], ''), method(getValue, [modifier(public)], [], type(primitive, int), [], [], [], '')], [], '').

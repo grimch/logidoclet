@@ -110,7 +110,7 @@ public non-sealed class C1 implements I1<Integer, String>, Serializable {
 
     /**
      * Demonstrates a method with a receiver parameter annotation and a local record declaration.
-     * @param this The receiver parameter, annotated with {@link TestAnno}.
+
      * @param input A list of strings to be processed.
      * @return The input list of strings.
      */
@@ -139,6 +139,10 @@ public non-sealed class C1 implements I1<Integer, String>, Serializable {
      */
     public static class StaticNestedC1 {
         /**
+         * Default constructor.
+         */
+        public StaticNestedC1() {}
+        /**
          * A private final integer value.
          */
         private final int value = 1;
@@ -153,6 +157,10 @@ public non-sealed class C1 implements I1<Integer, String>, Serializable {
      * A protected non-static inner class within C1.
      */
     protected class InnerC2 {
+        /**
+         * Default constructor.
+         */
+        protected InnerC2() {}
         /**
          * A method within the inner class that accesses the outer class's field.
          */

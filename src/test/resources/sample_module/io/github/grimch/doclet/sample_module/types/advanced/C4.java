@@ -18,7 +18,14 @@ import java.util.List;
  * @see I1
  * @see C1
  */
+/**
+ * Default constructor.
+ */
 public non-sealed class C4 implements I2, I1<Double, Boolean> {
+    /**
+     * Default constructor.
+     */
+    public C4() {}
     // --- FIELDS ---
     /**
      * A package-private static integer field.

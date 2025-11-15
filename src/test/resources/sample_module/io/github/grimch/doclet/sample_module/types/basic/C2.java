@@ -13,7 +13,12 @@ import java.util.List;
  * @see C3
  * @see Serializable
  */
+
 public abstract sealed class C2<T extends C1 & Serializable> permits C3 {
+    /**
+     * Default constructor.
+     */
+    protected C2() {}
     // --- FIELDS ---
     /**
      * A protected generic field of type {@code T}.

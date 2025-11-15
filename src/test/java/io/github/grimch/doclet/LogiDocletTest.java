@@ -29,16 +29,15 @@ public class LogiDocletTest {
                 "-verbose",
                 "-doclet", LogiDoclet.class.getName(),
                 "-d", outputDir.toString(),
-                "-outputCommentary",
+//                "-outputCommentary",
                 "--source-path", "src/test/resources/sample_module",
                 "-subpackages",  "io.github.grimch.doclet.sample_module"
-//                "--module", "io.github.grimch.doclet.sample_module1"
         };
         int result = tool.run(null, null, null, args);
         assertEquals(0, result, "Javadoc tool execution failed");
 
         Path expectedDir = Paths.get("src/test/resources/expected_output");
-        Path actualDir = outputDir;
+        Path actualDir = outputDir.resolve("minimal");
 
         try (Stream<Path> expectedFiles = Files.walk(expectedDir)) {
             expectedFiles

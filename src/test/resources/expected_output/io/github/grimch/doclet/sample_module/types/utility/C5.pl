@@ -1,0 +1,1 @@
+class('C5', 'io.github.grimch.doclet.sample_module.types.utility', [], [], 'null', [], [], [constructor('<init>', [], [], [], [], [], ''), field('PACKAGE_PRIVATE_FIELD', [modifier(static)], type(primitive, int), [], ''), method(m15, [modifier(public), modifier(synchronized)], [], type(no_type, void), [], [], [], '')], [annotation('java.lang.Deprecated', [])], '').
