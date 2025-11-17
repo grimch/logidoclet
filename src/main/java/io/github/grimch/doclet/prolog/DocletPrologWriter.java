@@ -1,62 +1,110 @@
 package io.github.grimch.doclet.prolog;
 
-import jdk.javadoc.doclet.DocletEnvironment;
-
-import javax.lang.model.element.*;
-import javax.lang.model.type.*;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
 
 /**
- * Manages the accumulation and writing of Prolog facts to the file system.
- * This class handles the creation of directory structure and the final output
- * of Prolog fact files, ensuring they conform to the specified metadata structure.
+ * Manages the writing of Prolog facts to the file system.
+ * <p>
+ * This class is responsible for creating the necessary directory structure that mirrors the Java package
+ * hierarchy and writing the generated {@link Fact} objects into {@code .pl} files. It ensures that
+ * different kinds of declarations (module, package, type) are written to their appropriate locations.
+ *
+ * @see Fact
+ * @see PrologVisitor
  */
 public class DocletPrologWriter {
 
     private final Path outputDirectory;
 
-    // public Record
-
-    // Accumulation maps
-    private final Map<String, List<Fact>> moduleFacts = new HashMap<>();       // Module name to list of facts
-
+    /**
+     * Constructs a new writer that will output files to the specified base directory.
+     *
+     * @param outputDirectory The root directory where the Prolog files and their
+     *                        directory structure will be created.
+     */
     public DocletPrologWriter(Path outputDirectory) {
         this.outputDirectory = outputDirectory;
     }
 
+    /**
+     * Writes the main index file for the entire documentation run.
+     * This file typically contains a fact that lists all the modules or packages processed.
+     *
+     * @param indexFact The top-level fact for the index.
+     * @throws IOException If an I/O error occurs while writing the file.
+     */
     public void writeIndexFile(Fact indexFact) throws IOException {
         writeFactToFile("", "index", indexFact);
     }
 
+    /**
+     * Writes a summary file for a Java module.
+     * The file will be named {@code module.pl} and placed in a directory corresponding
+     * to the module's name.
+     *
+     * @param moduleName The name of the module (e.g., "java.base").
+     * @param moduleFact The fact representing the module's declaration and contents.
+     */
     public void writeModuleSummaryFile(String moduleName, Fact moduleFact)  {
         writeFactToFile(moduleName, "module", moduleFact);
     }
 
+    /**
+     * Writes a summary file for a Java package.
+     * The file will be named {@code package.pl} and placed in a directory structure
+     * that mirrors the package name.
+     *
+     * @param packageName The fully qualified name of the package (e.g., "java.util").
+     * @param packageFact The fact representing the package's declaration.
+     */
     public void writePackageSummaryFile(String packageName, Fact packageFact)  {
         writeFactToFile(packageName, "package", packageFact);
     }
 
+    /**
+     * Writes a file for a specific Java type (class, interface, etc.).
+     * The file will be named after the type (e.g., {@code String.pl}) and placed in a
+     * directory structure that mirrors its package.
+     *
+     * @param packageName The fully qualified name of the package containing the type.
+     * @param typeName    The simple name of the type (e.g., "String").
+     * @param typeDeclarationFact The fact representing the type's declaration and members.
+     */
     public void writeTypeFile(String packageName, String typeName, Fact typeDeclarationFact) {
         writeFactToFile(packageName, typeName, typeDeclarationFact);
     }
 
+    /**
+     * Private helper to write a fact to a file within a specified hierarchical directory.
+     *
+     * @param hierarchy The dot-separated path (like a package name) for the directory structure.
+     * @param fileName  The base name of the file to write (without the .pl extension).
+     * @param fact      The fact to write to the file.
+     */
     private void writeFactToFile(String hierarchy, String fileName,  Fact fact) {
         Path fileDir = outputDirectory.resolve(hierarchy.replace('.', '/'));
         writeFactToFile(fileDir, fileName, fact);
     }
 
+    /**
+     * Core file-writing method. It creates the necessary directories and writes the
+     * fact to the specified file.
+     *
+     * @param fileDir  The directory where the file should be saved.
+     * @param fileName The base name of the file (without extension).
+     * @param fact     The fact to be written.
+     * @throws RuntimeException if an {@link IOException} occurs during file operations.
+     */
     private void writeFactToFile(Path fileDir, String fileName,  Fact fact) {
         try {
             Files.createDirectories(fileDir);
             Path typeFilePath = fileDir.resolve(fileName + ".pl");
 
             try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(typeFilePath))) {
-                // Write the main type declaration fact
+                // Write the main type declaration fact, terminated by a period.
                 writer.println(fact.toString() + ".");
             }
         } catch (IOException e) {

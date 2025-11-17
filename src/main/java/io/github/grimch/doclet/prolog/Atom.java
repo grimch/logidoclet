@@ -1,16 +1,46 @@
 package io.github.grimch.doclet.prolog;
 
 /**
- * Represents a Prolog atom.
+ * Represents a Prolog atom, a fundamental data type in Prolog for representing constant values.
+ * <p>
+ * An atom is a general-purpose, symbolic name. In this context, it is used to represent identifiers,
+ * strings, and other constant values from the Java source code in a format that Prolog can understand.
+ * <p>
+ * This class handles the necessary escaping and quoting to ensure that the string representation
+ * is a valid Prolog atom.
+ *
+ * @see Term
+ * @see Fact
  */
 public class Atom extends Term {
     private final String value;
 
+    /**
+     * Constructs a new Atom with the specified string value.
+     * The constructor automatically escapes any single quotes within the value
+     * to ensure it is a valid Prolog string literal when quoted.
+     *
+     * @param value The string value of the atom.
+     */
     public Atom(String value) {
         // Escape single quotes for Prolog atom representation
         this.value = value.replace("'", "''");
     }
 
+    /**
+     * Returns the Prolog representation of this atom.
+     * <p>
+     * The method applies Prolog's quoting rules:
+     * <ul>
+     *     <li>If the atom's value is a simple, unquoted atom (starts with a lowercase letter and contains only
+     *     alphanumeric characters and underscores), it is returned as is.</li>
+     *     <li>Otherwise, the value is enclosed in single quotes to form a valid Prolog quoted atom.</li>
+     * </ul>
+     * This ensures that atoms with special characters, spaces, or those starting with an uppercase letter
+     * are correctly interpreted by a Prolog engine.
+     *
+     * @return A string representing the atom in valid Prolog syntax.
+     */
     @Override
     public String toString() {
         // If the atom contains special characters or starts with an uppercase letter,

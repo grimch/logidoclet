@@ -18,26 +18,61 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * LogiDoclet is a custom Doclet that traverses Java source elements
- * and outputs Prolog facts representing the code structure.
+ * A custom Javadoc Doclet that generates a machine-readable Prolog representation of a Java codebase.
+ * <p>
+ * This doclet traverses the Abstract Syntax Tree (AST) of the Java source code provided by the javadoc tool
+ * and generates a set of Prolog facts that describe the structure of the code, including modules, packages,
+ * types (classes, interfaces, enums, records), methods, and fields.
+ * <p>
+ * It supports two modes of operation:
+ * <ul>
+ *     <li><b>minimal</b>: Generates facts about the code's structure without any Javadoc comments. This provides a
+ *     high-level architectural overview.</li>
+ *     <li><b>full</b>: Includes Javadoc comments in the generated facts, providing a richer, more detailed
+ *     semantic representation.</li>
+ * </ul>
+ * The output is organized into a directory structure that mirrors the project's package structure, with an
+ * index file for easy navigation.
+ *
+ * @see PrologVisitor
+ * @see DocletPrologWriter
  */
 public class LogiDoclet implements Doclet {
 
     private Reporter reporter;
     private Path outputDirectory;
-    private boolean outputCommentary = false; // New field, default to false
+    private boolean outputCommentary = false;
 
+    /**
+     * Initializes the doclet with the given locale and reporter.
+     * This method is called by the javadoc tool to set up the doclet.
+     *
+     * @param locale   The locale to use for any output.
+     * @param reporter The reporter to use for printing messages and errors.
+     */
     @Override
     public void init(Locale locale, Reporter reporter) {
         this.reporter = reporter;
         reporter.print(Diagnostic.Kind.NOTE, "LogiDoclet initialized.");
     }
 
+    /**
+     * Returns the name of this doclet.
+     *
+     * @return The string "LogiDoclet".
+     */
     @Override
     public String getName() {
         return "LogiDoclet";
     }
 
+    /**
+     * Returns the set of supported options for this doclet.
+     * This doclet supports the standard {@code -d} option for specifying the output directory
+     * and a custom {@code -outputCommentary} flag to control whether Javadoc comments are included.
+     *
+     * @return A set of supported {@link Doclet.Option}s.
+     */
     @Override
     public Set<? extends Doclet.Option> getSupportedOptions() {
         return Set.of(
@@ -115,11 +150,34 @@ public class LogiDoclet implements Doclet {
         );
     }
 
+    /**
+     * Returns the supported source version.
+     *
+     * @return The latest supported {@link SourceVersion}.
+     */
     @Override
     public SourceVersion getSupportedSourceVersion() {
         return SourceVersion.RELEASE_17;
     }
 
+    /**
+     * The main entry point of the doclet, called by the javadoc tool to execute the documentation generation.
+     * <p>
+     * This method orchestrates the entire process:
+     * <ol>
+     *     <li>Validates that an output directory has been specified.</li>
+     *     <li>Creates the output directory structure.</li>
+     *     <li>Copies necessary static resources (e.g., Prolog metastructure files) to the output directory.</li>
+     *     <li>Initializes the {@link PrologVisitor} and {@link DocletPrologWriter}.</li>
+     *     <li>Iterates over the elements included in the javadoc run (modules, packages, types).</li>
+     *     <li>Delegates the processing of each element to the {@link PrologVisitor}.</li>
+     *     <li>Writes the final index file containing a summary of all generated Prolog files.</li>
+     * </ol>
+     *
+     * @param environment The environment provided by the javadoc tool, containing all the information
+     *                    about the source code being documented.
+     * @return {@code true} if the generation was successful, {@code false} otherwise.
+     */
     @Override
     public boolean run(DocletEnvironment environment) {
         if (outputDirectory == null) {

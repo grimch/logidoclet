@@ -9,36 +9,63 @@ import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 import javax.lang.model.util.SimpleElementVisitor9;
 import javax.lang.model.util.SimpleTypeVisitor9;
 import javax.lang.model.util.Types;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
-import static javax.lang.model.element.ElementKind.*;
-
+import javax.tools.Diagnostic;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static javax.lang.model.element.ElementKind.*;
+
 /**
- * A visitor that traverses Java elements and converts them into Prolog facts.
- * It uses a DocletPrologWriter to persist the generated facts.
+ * A visitor that traverses the Java Abstract Syntax Tree (AST) and converts each element
+ * into a corresponding Prolog {@link Fact}.
+ * <p>
+ * This class implements the {@link SimpleElementVisitor9} pattern to handle different kinds of
+ * {@link Element}s such as modules, packages, types, methods, and fields. For each element,
+ * it constructs a {@code Fact} that represents the element's properties and relationships
+ * in a structured, machine-readable format.
+ * <p>
+ * The visitor collaborates with a {@link DocletPrologWriter} to persist the generated facts
+ * to the file system, creating a Prolog representation of the entire codebase.
+ *
+ * @see SimpleElementVisitor9
+ * @see DocletPrologWriter
+ * @see Fact
  */
 public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
 
     private final DocletPrologWriter writer;
     private final DocletEnvironment docEnv;
     private final Reporter reporter;
-    private final boolean outputCommentary; // New field
-    private List<Term> indexModuleList = new ArrayList<>();
+    private final boolean outputCommentary;
+    private final List<Term> indexModuleList = new ArrayList<>();
     private List<Fact> packageMembers = null;
     private List<Fact> typeMembers = null;
-    private Types typeUtils; ;
+    private final Types typeUtils;
 
+    /**
+     * Constructs a new PrologVisitor.
+     *
+     * @param writer           The writer responsible for outputting the generated Prolog facts.
+     * @param docEnv           The {@link DocletEnvironment} providing access to the source code elements.
+     * @param reporter         The {@link Reporter} for logging messages and errors.
+     * @param outputCommentary A boolean flag indicating whether to include Javadoc comments in the output.
+     */
     public PrologVisitor(DocletPrologWriter writer, DocletEnvironment docEnv, Reporter reporter, boolean outputCommentary) {
         this.writer = writer;
         this.docEnv = docEnv;
         this.reporter = reporter;
-        this.outputCommentary = outputCommentary; // Initialize new field
-        typeUtils = docEnv.getTypeUtils();
+        this.outputCommentary = outputCommentary;
+        this.typeUtils = docEnv.getTypeUtils();
     }
 
+    /**
+     * Visits a {@link ModuleElement} to generate Prolog facts about a Java module.
+     * It captures the module's name, directives (requires, exports, uses, provides), and contained packages.
+     *
+     * @param e The module element to visit.
+     * @param p A visitor-specified parameter (unused).
+     * @return Always returns {@code null}.
+     */
     @Override
     public Void visitModule(ModuleElement e, Void p) {
         String moduleName = e.getQualifiedName().toString();
@@ -88,6 +115,14 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         return null;
     }
 
+    /**
+     * Visits a {@link PackageElement} to generate Prolog facts about a Java package.
+     * It collects all the types within the package and writes a summary file.
+     *
+     * @param e The package element to visit.
+     * @param p A visitor-specified parameter (unused).
+     * @return Always returns {@code null}.
+     */
     @Override
     public Void visitPackage(PackageElement e, Void p) {
         packageMembers = new ArrayList<>();
@@ -104,6 +139,15 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         return null;
     }
 
+    /**
+     * Visits a {@link TypeElement} to generate Prolog facts for a class, interface, enum, record, or annotation.
+     * It recursively visits enclosed members (fields, methods, inner types) and then constructs and writes
+     * a fact representing the type itself.
+     *
+     * @param e The type element to visit.
+     * @param p A visitor-specified parameter (unused).
+     * @return Always returns {@code null}.
+     */
     @Override
     public Void visitType(TypeElement e, Void p) {
         typeMembers = new ArrayList<>();
@@ -201,7 +245,7 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                 );
                 break;
             default:
-                reporter.print(javax.tools.Diagnostic.Kind.WARNING, "Unsupported type kind: " + e.getKind() + " for " + qualifiedTypeName);
+                reporter.print(Diagnostic.Kind.WARNING, "Unsupported type kind: " + e.getKind() + " for " + qualifiedTypeName);
                 return null;
         }
 
@@ -214,9 +258,15 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         return null;
     }
 
+    /**
+     * Visits an {@link ExecutableElement} to generate Prolog facts for a method or constructor.
+     *
+     * @param e The executable element to visit.
+     * @param p A visitor-specified parameter (unused).
+     * @return Always returns {@code null}.
+     */
     @Override
     public Void visitExecutable(ExecutableElement e, Void p) {
-        String qualifiedTypeName = ((TypeElement) e.getEnclosingElement()).getQualifiedName().toString();
         Fact memberFact = null;
 
         switch (e.getKind()) {
@@ -244,7 +294,7 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                 );
                 break;
             default:
-                reporter.print(javax.tools.Diagnostic.Kind.WARNING, "Unsupported executable kind: " + e.getKind() + " for " + e.getSimpleName());
+                reporter.print(Diagnostic.Kind.WARNING, "Unsupported executable kind: " + e.getKind() + " for " + e.getSimpleName());
                 return null;
         }
 
@@ -254,9 +304,16 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         return null;
     }
 
+    /**
+     * Visits a {@link VariableElement} to generate Prolog facts for a field.
+     * Other kinds of variables (parameters, local variables) are handled in their respective contexts.
+     *
+     * @param e The variable element to visit.
+     * @param p A visitor-specified parameter (unused).
+     * @return Always returns {@code null}.
+     */
     @Override
     public Void visitVariable(VariableElement e, Void p) {
-        String qualifiedTypeName = ((TypeElement) e.getEnclosingElement()).getQualifiedName().toString();
         Fact memberFact = null;
 
         switch (e.getKind()) {
@@ -270,18 +327,14 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                 );
                 break;
             case ENUM_CONSTANT:
-                // Handled within visitType for enum constants
-                return null;
             case PARAMETER:
-                // Handled within visitExecutable for parameters
-                return null;
             case RESOURCE_VARIABLE:
             case LOCAL_VARIABLE:
             case EXCEPTION_PARAMETER:
-                // These are not typically part of the API documentation
+                // These are handled in other visit methods or ignored.
                 return null;
             default:
-                reporter.print(javax.tools.Diagnostic.Kind.WARNING, "Unsupported variable kind: " + e.getKind() + " for " + e.getSimpleName());
+                reporter.print(Diagnostic.Kind.WARNING, "Unsupported variable kind: " + e.getKind() + " for " + e.getSimpleName());
                 return null;
         }
 
@@ -293,6 +346,9 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
 
     // Helper methods to convert Java model elements to Prolog terms
 
+    /**
+     * Converts a {@link ModuleElement.RequiresDirective} to a Prolog {@code requires} fact.
+     */
     private Term toPrologRequires(ModuleElement.RequiresDirective r) {
         List<Term> modifiers = r.getDependency().getModifiers().stream()
                 .map(m -> new Atom(m.toString().toLowerCase()))
@@ -304,6 +360,9 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         );
     }
 
+    /**
+     * Converts a {@link ModuleElement.ExportsDirective} to a Prolog {@code exports} fact.
+     */
     private Term toPrologExports(ModuleElement.ExportsDirective e) {
         List<Term> toModules =
             Optional.ofNullable(e.getTargetModules())
@@ -319,6 +378,9 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         );
     }
 
+    /**
+     * Converts a {@link ModuleElement.ProvidesDirective} to a Prolog {@code provides} fact.
+     */
     private Term toPrologProvides(ModuleElement.ProvidesDirective p) {
         List<Term> withImplementations = p.getImplementations().stream()
                 .map(t -> toPrologType(t.asType()))
@@ -330,31 +392,9 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         );
     }
 
-    private Term toPrologEnumConstant(Element e) {
-        VariableElement enumConstant = (VariableElement) e;
-        // Extracting actual constructor arguments for enum constants is complex with the current Element API.
-        // It would typically require using the DocTree API to inspect the EnumConstantTree.
-        // For now, we provide an empty list to match the metadata arity.
-        List<Term> constructorArguments = new ArrayList<>(); // Placeholder for actual arguments
-        return new Fact("enum_constant",
-                new Atom(enumConstant.getSimpleName().toString()),
-                toPrologAnnotationList(enumConstant.getAnnotationMirrors()),
-                new PrologList(constructorArguments)
-        );
-    }
-
-    private Term toPrologAnnotationMember(ExecutableElement e) {
-        // Annotation members are essentially methods with a default value
-        Term defaultValue = (e.getDefaultValue() != null) ? toPrologAnnotationValue(e.getDefaultValue()) : new Atom("null");
-        return new Fact("annotation_member",
-                new Atom(e.getSimpleName().toString()),
-                toPrologType(e.getReturnType()),
-                defaultValue,
-                toPrologAnnotationList(e.getAnnotationMirrors()),
-                new Atom("") // text_block - not directly available from ExecutableElement
-        );
-    }
-
+    /**
+     * Converts a {@link RecordComponentElement} to a Prolog {@code record_component} fact.
+     */
     private Term toPrologRecordComponent(Element e) {
         RecordComponentElement recordComponent = (RecordComponentElement) e;
         return new Fact("record_component",
@@ -364,18 +404,27 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         );
     }
 
+    /**
+     * Converts a set of {@link Modifier}s to a Prolog list of modifier facts.
+     */
     private PrologList toPrologModifierList(Set<Modifier> modifiers) {
         return new PrologList(modifiers.stream()
                 .map(m -> new Fact("modifier", new Atom(m.toString().toLowerCase())))
                 .collect(Collectors.toList()));
     }
 
+    /**
+     * Converts a list of {@link TypeParameterElement}s to a Prolog list of type parameter facts.
+     */
     private PrologList toPrologTypeParameterList(List<? extends TypeParameterElement> typeParameters) {
         return new PrologList(typeParameters.stream()
                 .map(this::toPrologTypeParameter)
                 .collect(Collectors.toList()));
     }
 
+    /**
+     * Converts a single {@link TypeParameterElement} to a Prolog {@code type_parameter} fact.
+     */
     private Term toPrologTypeParameter(TypeParameterElement e) {
         List<Term> bounds = e.getBounds().stream()
                 .map(this::toPrologType)
@@ -387,6 +436,9 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         );
     }
 
+    /**
+     * Converts a superclass {@link TypeMirror} to a Prolog {@code extends} fact.
+     */
     private Term toPrologExtends(TypeMirror superclass) {
         if (superclass == null || superclass.getKind() == TypeKind.NONE || superclass.toString().equals("java.lang.Object")) {
             return new Atom("null");
@@ -394,22 +446,34 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         return new Fact("extends", new Atom(superclass.getKind().toString().toLowerCase()), toPrologType(superclass));
     }
 
+    /**
+     * Converts a list of interface {@link TypeMirror}s to a Prolog list of implements facts.
+     */
     private PrologList toPrologImplementsList(List<? extends TypeMirror> interfaces) {
         return new PrologList(interfaces.stream()
                 .map(this::toPrologImplements)
                 .collect(Collectors.toList()));
     }
 
+    /**
+     * Converts a single interface {@link TypeMirror} to a Prolog {@code implements} fact.
+     */
     private Term toPrologImplements(TypeMirror iface) {
         return new Fact("implements", new Atom(iface.getKind().toString().toLowerCase()), toPrologType(iface));
     }
 
+    /**
+     * Converts a list of method/constructor {@link VariableElement} parameters to a Prolog list of parameter facts.
+     */
     private PrologList toPrologParameterList(List<? extends VariableElement> parameters) {
         return new PrologList(parameters.stream()
                 .map(this::toPrologParameter)
                 .collect(Collectors.toList()));
     }
 
+    /**
+     * Converts a single {@link VariableElement} parameter to a Prolog {@code parameter} fact.
+     */
     private Term toPrologParameter(VariableElement e) {
         return new Fact("parameter",
                 new Atom(e.getSimpleName().toString()),
@@ -419,16 +483,28 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         );
     }
 
+    /**
+     * Converts a list of thrown {@link TypeMirror}s to a Prolog list of throws facts.
+     */
     private PrologList toPrologThrowsList(List<? extends TypeMirror> thrownTypes) {
         return new PrologList(thrownTypes.stream()
                 .map(this::toPrologThrows)
                 .collect(Collectors.toList()));
     }
 
+    /**
+     * Converts a single thrown {@link TypeMirror} to a Prolog {@code throws} fact.
+     */
     private Term toPrologThrows(TypeMirror t) {
         return new Fact("throws", toPrologType(t));
     }
 
+    /**
+     * Retrieves the Javadoc comment for a given element, if the {@code outputCommentary} flag is enabled.
+     *
+     * @param e The element whose comment is to be retrieved.
+     * @return The formatted Javadoc comment as a string, or an empty string if not available or disabled.
+     */
     private String getDocComment(Element e) {
         if (outputCommentary) {
             String comment = docEnv.getElementUtils().getDocComment(e);
@@ -437,12 +513,18 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         return "";
     }
 
+    /**
+     * Converts a list of {@link AnnotationMirror}s to a Prolog list of annotation facts.
+     */
     private PrologList toPrologAnnotationList(List<? extends AnnotationMirror> annotations) {
         return new PrologList(annotations.stream()
                 .map(this::toPrologAnnotation)
                 .collect(Collectors.toList()));
     }
 
+    /**
+     * Converts a single {@link AnnotationMirror} to a Prolog {@code annotation} fact.
+     */
     private Term toPrologAnnotation(AnnotationMirror annotation) {
         DeclaredType annotationType = annotation.getAnnotationType();
         String annotationName = ((TypeElement) annotationType.asElement()).getQualifiedName().toString();
@@ -454,6 +536,10 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         return new Fact("annotation", new Atom(annotationName), new PrologList(arguments));
     }
 
+    /**
+     * Converts an {@link AnnotationValue} to its corresponding Prolog {@link Term}.
+     * This uses a nested visitor to handle the different types of annotation values (literals, arrays, enums, etc.).
+     */
     private Term toPrologAnnotationValue(AnnotationValue value) {
         return new SimpleAnnotationValueVisitor8<Term, Void>() {
             @Override
@@ -523,14 +609,18 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                         .collect(Collectors.toList()));
             }
 
-            @Override
+@Override
             public Term visitUnknown(AnnotationValue av, Void p) {
-                reporter.print(javax.tools.Diagnostic.Kind.WARNING, "Unknown annotation value type: " + av);
+                reporter.print(Diagnostic.Kind.WARNING, "Unknown annotation value type: " + av);
                 return new Atom("unknown_annotation_value");
             }
         }.visit(value);
     }
 
+    /**
+     * Converts a {@link TypeMirror} into a structured Prolog {@link Term}.
+     * This uses a nested visitor to handle different kinds of types (declared, primitive, array, etc.).
+     */
     private Term toPrologType(TypeMirror typeMirror) {
         return typeMirror.accept(new SimpleTypeVisitor9<Term, Void>() {
             @Override
@@ -576,12 +666,17 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
 
             @Override
             protected Term defaultAction(TypeMirror e, Void aVoid) {
-                reporter.print(javax.tools.Diagnostic.Kind.WARNING, "Unsupported type mirror kind: " + e.getKind() + " for " + e);
+                reporter.print(Diagnostic.Kind.WARNING, "Unsupported type mirror kind: " + e.getKind() + " for " + e);
                 return new Atom("unknown_type");
             }
         }, null);
     }
 
+    /**
+     * Returns the final index fact, which contains a list of all modules processed.
+     *
+     * @return A {@link Fact} representing the top-level index.
+     */
     public Fact getIndex() {
         return new Fact("index", new PrologList(indexModuleList));
     }
