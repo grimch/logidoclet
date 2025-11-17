@@ -1,58 +1,39 @@
 # LogiDoclet
 
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/grimch/logidoclet) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 LogiDoclet is a Javadoc Doclet that generates a machine-readable Prolog representation of your Java codebase. It is designed to enable efficient, cost-effective, and deep analysis of software projects by AI agents, bridging the gap between legacy code and modern large language models.
 
-## The Problem: Knowledge Gaps in Complex Codebases
+## The Problem
+In long-standing, in-house software projects, developer turnover is a significant challenge. New team members face a steep learning curve, trying to understand a large, complex codebase with incomplete or outdated documentation. This "knowledge gap" slows down development and hinders maintenance. Using AI to understand the code directly is often cost-prohibitive due to high token costs, context window limitations, and the low signal-to-noise ratio in raw source code.
 
-In long-standing, in-house software projects, developer turnover is a significant challenge. When experienced developers leave, they take a vast amount of undocumented knowledge with them. New team members face a steep learning curve, trying to understand a large, complex codebase with incomplete or outdated documentation. This "knowledge gap" slows down development, hinders maintenance, and increases the risk of introducing bugs.
+## The Solution: A Semantic Indexer for Code
+LogiDoclet addresses these challenges by acting as a **semantic indexer**. Instead of asking an AI to read an entire library, LogiDoclet provides it with a map—a compact, structured, and unambiguous set of Prolog facts. It's the difference between giving an AI a library card catalog versus telling it to read every book on every shelf.
 
-A common idea is to use AI as a "golden hammer"—simply feeding the entire codebase to a large language model and asking it to understand everything. However, as our analysis has shown, this approach is fundamentally flawed and cost-prohibitive for several reasons:
-
-1.  **Extreme Token Cost:** Raw source code, filled with logic, boilerplate, and comments, is incredibly verbose. Processing millions of lines of code translates directly to high operational costs.
-2.  **Low Signal-to-Noise Ratio:** For structural understanding, the actual implementation logic inside a method is "noise." An AI must sift through thousands of tokens of code to extract a few key facts, like a method's signature or its relationship to other classes.
-3.  **Context Window Limitations:** Even the largest context windows cannot hold an entire enterprise-level codebase, making true holistic analysis impossible in a single pass.
-4.  **Inefficiency of HTML Javadoc:** Standard HTML documentation is built for human presentation, not machine analysis. It is bloated with markup and requires complex parsing, making it even less efficient than analyzing raw code.
-
-## The Solution: LogiDoclet - The AI's Jackhammer
-
-LogiDoclet addresses these challenges by acting as a **semantic indexer** for your codebase. Instead of asking an AI to read an entire library, LogiDoclet provides it with a map—a compact, structured, and unambiguous set of facts.
-
-It's the difference between giving an AI a library card catalog versus telling it to read every book on every shelf. LogiDoclet is not a golden hammer; it's a precision tool—a jackhammer that provides the AI with manageable, high-density pieces of information it can easily handle and reason about.
-
-### Key Advantages
-
-*   **Massive Cost Reduction:** Drastically reduces token consumption (by over 90% in tests) for AI analysis compared to raw code or HTML Javadoc.
+### Key Features
+*   **Massive Cost Reduction:** Drastically reduces token consumption (by over 90% in tests) for AI analysis compared to raw code.
 *   **High-Density Information:** Provides a noise-free, structured view of the codebase's architecture, types, and their relationships.
-*   **Enables Large-Scale Analysis:** The compact format allows an entire project's structure to fit within an AI's context window, enabling holistic and deep architectural queries.
-*   **Bootstraps Knowledge Transfer:** Facilitates a powerful workflow for documenting legacy code and accelerating the onboarding process for new developers.
+*   **Enables Large-Scale Analysis:** The compact format allows an entire project's structure to fit within an AI's context window, enabling holistic architectural queries.
+*   **Bootstraps Knowledge Transfer:** Facilitates a powerful workflow for documenting legacy code and accelerating developer onboarding.
 
-## The Two-Phase Approach: Bootstrapping Code Understanding
-
-LogiDoclet is designed to be used in a powerful, iterative loop that allows an AI to not only understand a codebase but to actively enrich it.
+## How It Works: The Two-Phase Approach
+LogiDoclet is designed for an iterative loop that allows an AI to not only understand a codebase but to actively enrich it.
 
 ### Phase 1: Initial Scaffolding (Minimal Version)
-
-First, run LogiDoclet to generate the **minimal** documentation. This version contains only the structural facts of your code (classes, methods, fields, relationships) without any comments.
-
-This minimal representation serves as a low-cost, high-density "map" of the entire project. It's small enough to be fully loaded by an AI, providing an immediate and complete overview of the codebase's architecture.
+First, run LogiDoclet to generate the **minimal** documentation. This version contains only the structural facts of your code (classes, methods, fields, relationships) without any comments. This serves as a low-cost, high-density "map" of the entire project.
 
 ### Phase 2: Incremental Enrichment (Full Version)
-
 This phase creates a virtuous cycle of analysis and documentation:
-
-1.  **Targeted Analysis:** Using the minimal "map" from Phase 1, the AI targets a specific, manageable section of the code (e.g., a single package or a set of related classes).
+1.  **Targeted Analysis:** Using the minimal "map," the AI targets a specific section of the code (e.g., a single package).
 2.  **Deep Code Reading:** The AI reads the raw `.java` source files for *only that targeted section*.
-3.  **Generate Understanding:** With its deep understanding of the code's logic and the structural context from the Prolog facts, the AI generates high-quality, descriptive Javadoc comments for the classes and methods in that section.
-4.  **Update Source Code:** These new Javadoc comments are written back into the original `.java` files.
-5.  **Regenerate Enriched Docs:** LogiDoclet is run again, but this time to generate the **full** version. This new documentation now includes the AI-generated comments as structured facts.
-6.  **Repeat:** In the next session, the AI uses this enriched "full" documentation. It now has access to both the code's structure and high-level semantic summaries, making its next analysis task even faster and more insightful.
-
-This iterative process turns your undocumented, legacy codebase into a well-documented, AI-navigable asset, one package at a time.
+3.  **Generate Understanding:** The AI generates high-quality, descriptive Javadoc comments.
+4.  **Update Source Code:** These new Javadoc comments are written back into the `.java` files.
+5.  **Regenerate Enriched Docs:** LogiDoclet is run again, this time to generate the **full** version (with comments).
+6.  **Repeat:** The AI can now use the enriched documentation for even faster and more insightful analysis in the next cycle.
 
 ### Process Visualization
 
 #### Overall Process
-
 ```mermaid
 graph TD
     A[Legacy Java Project] --> B{"Run LogiDoclet (minimal)"};
@@ -63,7 +44,6 @@ graph TD
 ```
 
 #### Phase 2 Enrichment Cycle
-
 ```mermaid
 graph TD
     A[Start with Minimal/Enriched Prolog Docs] --> B{1. AI targets a package};
@@ -75,10 +55,102 @@ graph TD
     G --> B;
 ```
 
-## Getting Started
+---
 
-LogiDoclet is a standard Maven project. To build it and generate the documentation for the test project, run:
+## User Guide
 
+### Running LogiDoclet
+To use LogiDoclet, invoke the standard `javadoc` tool and specify `LogiDoclet` as the doclet.
+
+#### Options
+*   `-d <directory>`: **(Required)** Specifies the output directory for the Prolog files.
+*   `-outputCommentary`: (Optional) Includes Javadoc comments in the Prolog output. If omitted, a "minimal" version without comments is generated.
+*   All other standard `javadoc` options like `--source-path` and `-subpackages` are supported.
+
+#### Example Command
+```bash
+javadoc -doclet io.github.grimch.doclet.LogiDoclet \
+        -d target/prolog-docs \
+        -outputCommentary \
+        --source-path src/main/java \
+        -subpackages com.example.myproject
+```
+
+---
+
+## Developer Guide
+
+This guide provides information for developers who want to contribute to LogiDoclet itself.
+
+### Prerequisites
+*   Java Development Kit (JDK) 17 or later.
+*   Apache Maven 3.6.0 or later.
+
+### Building and Testing
+LogiDoclet is a standard Maven project. To build the project, run the tests, and install it in your local repository, execute:
 ```bash
 mvn clean install
 ```
+This command will also run the integration test in `LogiDocletTest`, which generates Prolog facts for a sample project and compares them against an expected output.
+
+### Core Concepts
+
+#### Architecture Overview
+LogiDoclet hooks into the `javadoc` toolchain. The tool parses the Java source and provides an Abstract Syntax Tree (AST) to our doclet, which then transforms the AST nodes into Prolog facts.
+
+```mermaid
+graph TD
+    subgraph Javadoc Tool
+        A[Java Source Code] --> B{javadoc};
+    end
+
+    subgraph LogiDoclet Core
+        B -- Doclet API provides AST --> C[LogiDoclet.run()];
+        C -- instantiates and runs --> D[PrologVisitor];
+        D -- traverses AST --> D;
+        D -- creates --> E[Prolog Data Model<br>(Fact, Atom, PrologList)];
+        E -- are written by --> F[DocletPrologWriter];
+    end
+
+    subgraph Output
+        F --> G[Prolog Files (*.pl)];
+    end
+```
+
+#### Project Structure
+```
+.
+├── pom.xml                 # Maven build configuration
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── io/github/grimch/doclet
+    │   │       ├── LogiDoclet.java         # Main doclet entry point
+    │   │       └── prolog
+    │   │           ├── PrologVisitor.java  # Traverses the Java AST
+    │   │           ├── DocletPrologWriter.java # Writes facts to files
+    │   │           └── *.java              # Prolog data model (Term, Fact, etc.)
+    │   └── resources
+    │       └── java_metastructure.pl # Defines the Prolog schema for the facts
+    └── test
+        ├── java                        # Unit and integration tests
+        └── resources
+            ├── sample_module           # A sample Java project for testing
+            └── expected_output         # The expected Prolog output for the sample
+```
+
+#### Key Components
+1.  **`LogiDoclet`**: The main class implementing `jdk.javadoc.doclet.Doclet`. It handles options and orchestrates the process.
+2.  **`PrologVisitor`**: A `SimpleElementVisitor9` that does the core work. It traverses the AST elements (modules, packages, types, methods) provided by the Doclet API.
+3.  **Prolog Data Model (`Term`, `Fact`, `Atom`, `PrologList`)**: A set of classes that represent Prolog constructs. The `PrologVisitor` builds a tree of these objects, which can then be serialized into valid Prolog syntax via their `toString()` methods.
+4.  **`DocletPrologWriter`**: Manages the creation of the output directory structure and writes the generated Prolog facts into `.pl` files.
+
+### Contributing
+Contributions are welcome! Please follow these guidelines:
+1.  **Code Style:** Adhere to the existing code style and formatting.
+2.  **Add Javadoc:** Document all new public classes and methods.
+3.  **Add Tests:** All new features or bug fixes must be accompanied by a corresponding test case. If you modify the output format, update the files in `src/test/resources/expected_output`.
+4.  **Create Issues:** For major changes, please open an issue first to discuss the proposed changes.
+
+## License
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
