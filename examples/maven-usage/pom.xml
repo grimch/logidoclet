@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.github.grimch</groupId>
+    <artifactId>logidoclet-test</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>LogiDocletTest</name>
+    <description>A test project for the LogiDoclet.</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+		<maven.javadoc.plugin.version>3.11.3</maven.javadoc.plugin.version>
+		<logidoclet.version>1.0.0</logidoclet.version>
+		<logidoc.output.directory>${project.build.directory}/../gemini/prolog-doc</logidoc.output.directory>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven.javadoc.plugin.version}</version>
+                <configuration>
+					<!-- uncomment next two lines for troubleshooting -->
+					<!-- debug>true</debug -->
+					<!-- verbose>true</verbose -->
+					<!-- This is necessary because otherwise LogiDoclet will respective parameter -->
+					<disableNoFonts>true</disableNoFonts>
+					<subpackages>io.github.grimch.doclet.sample_module</subpackages>
+                    <doclet>io.github.grimch.doclet.LogiDoclet</doclet>
+                    <docletArtifact>
+                        <groupId>io.github.grimch</groupId>
+                        <artifactId>logidoclet</artifactId>
+                        <version>${logidoclet.version}</version>
+                    </docletArtifact>
+                    <useStandardDocletOptions>false</useStandardDocletOptions>
+					<additionalOptions>
+                        <!-- Pass the output directory to your custom doclet -->  					
+						<additionalOption>-d ${logidoc.output.directory}</additionalOption>
+                        <!-- Pass the outputCommentary flag -->
+                        <!-- Comment out the line below to enable minimal output -->
+						<additionalOption>-outputCommentary</additionalOption>
+					</additionalOptions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
