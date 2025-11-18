@@ -82,8 +82,7 @@ public class LogiDocletTest {
      * @throws IOException if an error occurs during file I/O operations (e.g., reading or deleting files).
      */
     @Test
-    public void testDoclet() throws IOException {
-        DocumentationTool tool = ToolProvider.getSystemDocumentationTool();
+    public void testMinimalOutput() throws IOException {
         String[] args = {
                 "-verbose",
                 "-doclet", LogiDoclet.class.getName(),
@@ -91,11 +90,65 @@ public class LogiDocletTest {
                 "--source-path", "src/test/resources/sample_module",
                 "-subpackages",  "io.github.grimch.doclet.sample_module"
         };
+        testDoclet(args, "minimal");
+    }
+
+    /**
+     * Executes the {@link LogiDoclet} on a sample java class to get formatted output and verifies the same.
+     * <p>
+     * The test performs the following steps:
+     * <ol>
+     *     <li>Invokes the system's {@link DocumentationTool} (javadoc) with the {@code LogiDoclet}.</li>
+     *     <li>Specifies the source path to the sample class to process.</li>
+     *     <li>Asserts that the javadoc tool execution completes successfully (exit code 0).</li>
+     *     <li>Compares the expected output  file line-by-line with its corresponding actual generated file.</li>
+     *     <li>Asserts that the contents of the actual and expected file are identical.</li>
+     * </ol>
+     *
+     * @throws IOException if an error occurs during file I/O operations (e.g., reading or deleting files).
+     */
+    @Test
+    public void testFormattedOutput() throws IOException {
+        String[] args = {
+                "-verbose",
+                "-doclet", LogiDoclet.class.getName(),
+                "-d", outputDir.toString(),
+                "-outputCommentary",
+                "-prettyPrint",
+                "--source-path", "src/test/resources/sample_module",
+                "-subpackages",  "io.github.grimch.doclet.sample_module"
+        };
+        testDoclet(args, "full");
+    }
+
+    /**
+     * Executes the {@link LogiDoclet} on a sample project and verifies its output .
+     * <p>
+     * The test performs the following steps:
+     * <ol>
+     *     <li>Invokes the system's {@link DocumentationTool} (javadoc) with the {@code LogiDoclet}.</li>
+     *     <li>Specifies the source path to a sample module and the packages to process.</li>
+     *     <li>Asserts that the javadoc tool execution completes successfully (exit code 0).</li>
+     *     <li>Recursively walks the directory of expected Prolog files and compares each file
+     *         line-by-line with its corresponding actual generated file.</li>
+     *     <li>Asserts that the contents of the actual and expected files are identical.</li>
+     * </ol>
+     *
+     * @param args  The arguments to pass to the javadoc.
+     * @param mode The javadoc execution mode:
+     * <ol>
+     *     <li>minimal: Output as single line without comments.</li>
+     *     <li>full: Formatted output including  comments.</li>
+     * </ol>
+     * @throws IOException if an error occurs during file I/O operations (e.g., reading or deleting files).
+     */
+    private void testDoclet(String[] args, String mode) throws IOException {
+        DocumentationTool tool = ToolProvider.getSystemDocumentationTool();
         int result = tool.run(null, null, null, args);
         assertEquals(0, result, "Javadoc tool execution failed");
 
-        Path expectedDir = Paths.get("src/test/resources/expected_output/minimal");
-        Path actualDir = outputDir.resolve("minimal");
+        Path expectedDir = Paths.get("src/test/resources/expected_output/" + mode);
+        Path actualDir = outputDir.resolve(mode);
 
         try (Stream<Path> expectedFiles = Files.walk(expectedDir)) {
             expectedFiles
@@ -118,40 +171,6 @@ public class LogiDocletTest {
                         }
                     });
         }
-    }
-
-    /**
-     * Executes the {@link LogiDoclet} on a sample java class to get formatted output and verifies the same.
-     * <p>
-     * The test performs the following steps:
-     * <ol>
-     *     <li>Invokes the system's {@link DocumentationTool} (javadoc) with the {@code LogiDoclet}.</li>
-     *     <li>Specifies the source path to the sample class to process.</li>
-     *     <li>Asserts that the javadoc tool execution completes successfully (exit code 0).</li>
-     *     <li>Compares the expected output  file line-by-line with its corresponding actual generated file.</li>
-     *     <li>Asserts that the contents of the actual and expected file are identical.</li>
-     * </ol>
-     *
-     * @throws IOException if an error occurs during file I/O operations (e.g., reading or deleting files).
-     */
-    @Test
-    public void testFormattedOutput() throws IOException {
-        DocumentationTool tool = ToolProvider.getSystemDocumentationTool();
-        String[] args = {
-                "-verbose",
-                "-doclet", LogiDoclet.class.getName(),
-                "-d", outputDir.toString(),
-                "-outputCommentary",
-                "-prettyPrint",
-                "--source-path", "src/test/resources/sample_module",
-                "-subpackages",  "io.github.grimch.doclet.sample_module"
-        };
-        int result = tool.run(null, null, null, args);
-        assertEquals(0, result, "Javadoc tool execution failed");
-
-        Path expectedFilePath = Paths.get("src/test/resources/expected_output/full/io/github/grimch/doclet/sample_module/types/basic/C1.pl");
-        Path actualFilePath = outputDir.resolve("full/io/github/grimch/doclet/sample_module/types/basic/C1.pl");
-        assertEquals(Files.readAllLines(expectedFilePath), Files.readAllLines(actualFilePath), "File content mismatch for C1.pl");
     }
 }
 

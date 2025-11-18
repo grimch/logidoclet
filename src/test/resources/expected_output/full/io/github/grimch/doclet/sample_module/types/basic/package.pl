@@ -1,0 +1,15 @@
+package_declaration(
+    'io.github.grimch.doclet.sample_module.types.basic',
+    [
+        type_declaration('StaticNestedC1', 'CLASS'),
+        type_declaration('InnerC2', 'CLASS'),
+        type_declaration('C1', 'CLASS'),
+        type_declaration('C2', 'CLASS'),
+        type_declaration('C3', 'CLASS'),
+        type_declaration('E1', 'ENUM'),
+        type_declaration('I1', 'INTERFACE'),
+        type_declaration('R1', 'RECORD'),
+        type_declaration('R2', 'RECORD'),
+        type_declaration('TestAnno', 'ANNOTATION_TYPE')
+    ]
+).
