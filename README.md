@@ -164,6 +164,14 @@ To make it easy to experiment, a complete, runnable Maven example is provided in
     ```
     The Prolog documentation will be generated in the `examples/maven-usage/build/prolog-docs` directory. Output will be full output (inlcuding comments) and formatted.
 
+### Output Files and AI Tool Integration
+
+LogiDoclet generates several files in the specified output directory (`-d` option), which are crucial for AI agent integration:
+
+*   **`java_metastructure.pl`**: This file defines the Prolog schema (predicates and their arities) used to represent the Java codebase. It's essential for any Prolog-based AI agent to correctly interpret the generated facts.
+*   **`LLM_context.md`**: This Markdown file provides a high-level overview and context of the Java project, intended to be consumed directly by Large Language Models (LLMs). It summarizes the project's structure and key components, helping the LLM to quickly grasp the codebase's purpose and organization.
+*   **`templates/master_LLM_context.md.template`**: This file serves as a structured template for initializing AI tools like Claude Code and Gemini CLI. It is designed to be copied directly into your project's root directory (or a designated context directory for your AI tool) under a suitable name (e.g., `gemini.md` or `claude.md`). The AI tool is then expected to interpret this file, which contains references to `LLM_context.md` and the generated Prolog facts, to establish its initial context about the codebase. The template itself does not require manual placeholder replacement by the user.
+
 ---
 ## Developer Guide
 
