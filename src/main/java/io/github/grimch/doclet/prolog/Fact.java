@@ -41,6 +41,14 @@ import java.util.stream.Collectors;
  * @see PrologList
  */
 public class Fact extends Term {
+    public String getPredicate() {
+        return predicate;
+    }
+
+    public List<Term> getArguments() {
+        return arguments;
+    }
+
     private final String predicate;
     private final List<Term> arguments;
 

@@ -36,6 +36,10 @@ import java.util.stream.Collectors;
  * @see Term
  */
 public class PrologList extends Term {
+    public List<Term> getElements() {
+        return elements;
+    }
+
     private final List<Term> elements;
 
     /**

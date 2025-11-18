@@ -41,15 +41,19 @@ import java.nio.file.Path;
 public class DocletPrologWriter {
 
     private final Path outputDirectory;
+    private final boolean prettyPrint;
+    private final PrettyPrinter prettyPrinter = new PrettyPrinter();
 
     /**
      * Constructs a new writer that will output files to the specified base directory.
      *
      * @param outputDirectory The root directory where the Prolog files and their
      *                        directory structure will be created.
+     * @param prettyPrint     PrettyPrint flag which enables formatted, indented output.
      */
-    public DocletPrologWriter(Path outputDirectory) {
+    public DocletPrologWriter(Path outputDirectory, boolean prettyPrint) {
         this.outputDirectory = outputDirectory;
+        this.prettyPrint = prettyPrint;
     }
 
     /**
@@ -124,11 +128,11 @@ public class DocletPrologWriter {
     private void writeFactToFile(Path fileDir, String fileName,  Fact fact) {
         try {
             Files.createDirectories(fileDir);
-            Path typeFilePath = fileDir.resolve(fileName + ".pl");
+            Path factFilePath = fileDir.resolve(fileName + ".pl");
 
-            try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(typeFilePath))) {
+            try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(factFilePath))) {
                 // Write the main type declaration fact, terminated by a period.
-                writer.println(fact.toString() + ".");
+                writer.println(prettyPrint ? prettyPrinter.prettyPrint(fact) : fact.toString() + ".");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

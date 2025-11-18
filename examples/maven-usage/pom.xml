@@ -42,10 +42,16 @@
                     <useStandardDocletOptions>false</useStandardDocletOptions>
 					<additionalOptions>
                         <!-- Pass the output directory to your custom doclet -->  					
+
 						<additionalOption>-d ${logidoc.output.directory}</additionalOption>
                         <!-- Pass the outputCommentary flag -->
-                        <!-- Comment out the line below to enable minimal output -->
+                        <!-- Comment out the line below to enable full output -->
+
 						<additionalOption>-outputCommentary</additionalOption>
+                        <!-- Pass the outputCommentary flag -->
+                        <!-- Comment out the line below to enable full output -->
+                        <!-- Note: tokenisation is more efficient wit this disabled -->
+						<additionalOption>-prettyPrint</additionalOption>
 					</additionalOptions>
                 </configuration>
             </plugin>

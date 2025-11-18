@@ -57,6 +57,9 @@ import java.util.Set;
  * The output is organized into a directory structure that mirrors the project's package structure, with an
  * index file for easy navigation.
  *
+ * Per default output is written to a file in a single line to make tokenization as efficient as possible.
+ * If you want to see formatted output set addtional parameter <b>prettyPrint</b>
+ *
  * @see PrologVisitor
  * @see DocletPrologWriter
  */
@@ -65,6 +68,7 @@ public class LogiDoclet implements Doclet {
     private Reporter reporter;
     private Path outputDirectory;
     private boolean outputCommentary = false;
+    private boolean prettyPrint = false;
 
     /**
      * Initializes the doclet with the given locale and reporter.
@@ -93,6 +97,7 @@ public class LogiDoclet implements Doclet {
      * Returns the set of supported options for this doclet.
      * This doclet supports the standard {@code -d} option for specifying the output directory
      * and a custom {@code -outputCommentary} flag to control whether Javadoc comments are included.
+     * Additionally you can provide {@code -prettyPrint} flag to get output well formatted instead of single line.
      *
      * @return A set of supported {@link Doclet.Option}s.
      */
@@ -165,6 +170,41 @@ public class LogiDoclet implements Doclet {
                     public boolean process(String option, java.util.List<String> arguments) {
                         if (option.equals("-outputCommentary")) {
                             outputCommentary = true;
+                            return true;
+                        }
+                        return false;
+                    }
+                },
+                new Option() { // New Option for prettyPrint
+                    @Override
+                    public int getArgumentCount() {
+                        return 0; // No argument needed for a boolean flag
+                    }
+
+                    @Override
+                    public String getDescription() {
+                        return "Format Prolog output.";
+                    }
+
+                    @Override
+                    public Option.Kind getKind() {
+                        return Option.Kind.STANDARD;
+                    }
+
+                    @Override
+                    public java.util.List<String> getNames() {
+                        return java.util.List.of("-prettyPrint");
+                    }
+
+                    @Override
+                    public String getParameters() {
+                        return ""; // No parameters
+                    }
+
+                    @Override
+                    public boolean process(String option, java.util.List<String> arguments) {
+                        if (option.equals("-prettyPrint")) {
+                            prettyPrint = true;
                             return true;
                         }
                         return false;
@@ -261,7 +301,7 @@ public class LogiDoclet implements Doclet {
 
         reporter.print(Diagnostic.Kind.NOTE, "Generating Prolog facts to: " + actualOutputDirectory.toAbsolutePath());
 
-        DocletPrologWriter writer = new DocletPrologWriter(actualOutputDirectory);
+        DocletPrologWriter writer = new DocletPrologWriter(actualOutputDirectory, prettyPrint);
         PrologVisitor visitor = new PrologVisitor(writer, environment, reporter, outputCommentary);
 
         try {
