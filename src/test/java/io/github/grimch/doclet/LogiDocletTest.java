@@ -23,6 +23,7 @@
  */
 package io.github.grimch.doclet;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.DocumentationTool;
@@ -46,13 +47,30 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * correct, structured representation of the source code.
  */
 public class LogiDocletTest {
+    private static Path outputDir;
+
+    /**
+     *
+     * Sets up a clean output directory.</li>
+     *
+     * @throws IOException if an error occurs during file I/O operations (e.g., reading or deleting files).
+     */
+    @BeforeAll
+    public static void cleanOutputDir() throws IOException {
+        outputDir = Paths.get("target/test-output");
+        if (Files.exists(outputDir)) {
+            try (Stream<Path> files = Files.walk(outputDir)) {
+                files.sorted(java.util.Comparator.reverseOrder()).map(Path::toFile).forEach(java.io.File::delete);
+            }
+        }
+
+    }
 
     /**
      * Executes the {@link LogiDoclet} on a sample project and verifies its output.
      * <p>
      * The test performs the following steps:
      * <ol>
-     *     <li>Sets up a clean output directory.</li>
      *     <li>Invokes the system's {@link DocumentationTool} (javadoc) with the {@code LogiDoclet}.</li>
      *     <li>Specifies the source path to a sample module and the packages to process.</li>
      *     <li>Asserts that the javadoc tool execution completes successfully (exit code 0).</li>
@@ -65,27 +83,18 @@ public class LogiDocletTest {
      */
     @Test
     public void testDoclet() throws IOException {
-        Path outputDir = Paths.get("target/test-output");
-        if (Files.exists(outputDir)) {
-            try (Stream<Path> files = Files.walk(outputDir)) {
-                files.sorted(java.util.Comparator.reverseOrder()).map(Path::toFile).forEach(java.io.File::delete);
-            }
-        }
-        
         DocumentationTool tool = ToolProvider.getSystemDocumentationTool();
         String[] args = {
                 "-verbose",
                 "-doclet", LogiDoclet.class.getName(),
                 "-d", outputDir.toString(),
-//                "-outputCommentary",
-//                "-prettyPrint",
                 "--source-path", "src/test/resources/sample_module",
                 "-subpackages",  "io.github.grimch.doclet.sample_module"
         };
         int result = tool.run(null, null, null, args);
         assertEquals(0, result, "Javadoc tool execution failed");
 
-        Path expectedDir = Paths.get("src/test/resources/expected_output");
+        Path expectedDir = Paths.get("src/test/resources/expected_output/minimal");
         Path actualDir = outputDir.resolve("minimal");
 
         try (Stream<Path> expectedFiles = Files.walk(expectedDir)) {
@@ -109,6 +118,40 @@ public class LogiDocletTest {
                         }
                     });
         }
+    }
+
+    /**
+     * Executes the {@link LogiDoclet} on a sample java class to get formatted output and verifies the same.
+     * <p>
+     * The test performs the following steps:
+     * <ol>
+     *     <li>Invokes the system's {@link DocumentationTool} (javadoc) with the {@code LogiDoclet}.</li>
+     *     <li>Specifies the source path to the sample class to process.</li>
+     *     <li>Asserts that the javadoc tool execution completes successfully (exit code 0).</li>
+     *     <li>Compares the expected output  file line-by-line with its corresponding actual generated file.</li>
+     *     <li>Asserts that the contents of the actual and expected file are identical.</li>
+     * </ol>
+     *
+     * @throws IOException if an error occurs during file I/O operations (e.g., reading or deleting files).
+     */
+    @Test
+    public void testFormattedOutput() throws IOException {
+        DocumentationTool tool = ToolProvider.getSystemDocumentationTool();
+        String[] args = {
+                "-verbose",
+                "-doclet", LogiDoclet.class.getName(),
+                "-d", outputDir.toString(),
+                "-outputCommentary",
+                "-prettyPrint",
+                "--source-path", "src/test/resources/sample_module",
+                "-subpackages",  "io.github.grimch.doclet.sample_module"
+        };
+        int result = tool.run(null, null, null, args);
+        assertEquals(0, result, "Javadoc tool execution failed");
+
+        Path expectedFilePath = Paths.get("src/test/resources/expected_output/full/io/github/grimch/doclet/sample_module/types/basic/C1.pl");
+        Path actualFilePath = outputDir.resolve("full/io/github/grimch/doclet/sample_module/types/basic/C1.pl");
+        assertEquals(Files.readAllLines(expectedFilePath), Files.readAllLines(actualFilePath), "File content mismatch for C1.pl");
     }
 }
 
