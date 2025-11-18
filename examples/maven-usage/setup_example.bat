@@ -20,5 +20,5 @@ REM The /y switch suppresses prompts to overwrite existing files.
 xcopy "..\..\src\test\resources\sample_module" "%DEST_SRC%\main\java" /e /i /h /y
 
 echo "Setup complete. The example project is ready in 'examples/maven-usage'."
-echo "You can now run 'mvn javadoc:javadoc' in this directory."
+echo "You can now run 'mvn clean javadoc:javadoc' in this directory."
 

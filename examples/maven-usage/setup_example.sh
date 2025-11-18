@@ -26,4 +26,4 @@ echo "Copying sample module source..."
 cp -r "$SAMPLE_SRC"/* "$DEST_SRC/main/java/"
 
 echo "Setup complete. The example project is ready in 'examples/maven-usage'."
-echo "You can now run 'mvn javadoc:javadoc' in this directory."
+echo "You can now run 'mvn clean javadoc:javadoc' in this directory."
