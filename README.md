@@ -54,8 +54,7 @@ graph TD
     F --> G[New Enriched Prolog Docs];
     G --> B;
 ```
-
----\n
+---
 ## User Guide
 
 There are two primary ways to use LogiDoclet: directly via the `javadoc` command-line tool, or as a plugin in a Maven build.
@@ -134,6 +133,10 @@ Key configuration snippet from the example:
             <!-- Pass the outputCommentary flag -->
             <!-- Uncomment the line below to enable commentary output -->
             <!-- additionalOption>-outputCommentary</additionalOption -->
+            <!-- Pass the prettyPrint flag -->
+            <!-- Comment out the line below to enable full output -->
+            <!-- Note: tokenization is more efficient wit this disabled -->
+            <!-- additionalOption>-prettyPrint</additionalOption -->
         </additionalOptions>
     </configuration>
 </plugin>
@@ -157,9 +160,9 @@ To make it easy to experiment, a complete, runnable Maven example is provided in
         ```
 3.  **Run the Maven javadoc plugin:**
     ```bash
-    mvn javadoc:javadoc
+    mvn clean javadoc:javadoc
     ```
-    The Prolog documentation will be generated in the `examples/maven-usage/build/prolog-docs` directory.
+    The Prolog documentation will be generated in the `examples/maven-usage/build/prolog-docs` directory. Output will be full output (inlcuding comments) and formatted.
 
 ---
 ## Developer Guide
@@ -213,6 +216,7 @@ graph TD
     │   │       └── prolog
     │   │           ├── PrologVisitor.java  # Traverses the Java AST
     │   │           ├── DocletPrologWriter.java # Writes facts to files
+    │   │           ├── PrettyPrinter.java # Formats output for better readability (note that this will make tokenizazion less efficient).
     │   │           └── *.java              # Prolog data model (Term, Fact, etc.)
     │   └── resources
     │       └── java_metastructure.pl # Defines the Prolog schema for the facts
