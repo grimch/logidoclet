@@ -1,11 +1,10 @@
 /target/
 /attic/
-/.gemini/
 !.mvn/wrapper/maven-wrapper.jar
 .idea
 *.iws
 *.iml
 *.ipr
-/examples/maven-usage/gemini/
+/examples/maven-usage/llm-context/
 /examples/maven-usage/src/
 /examples/maven-usage/target/

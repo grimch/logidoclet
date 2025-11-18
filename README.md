@@ -2,19 +2,19 @@
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/grimch/logidoclet) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-LogiDoclet is a Javadoc Doclet that generates a machine-readable Prolog representation of your Java codebase. It is designed to enable efficient, cost-effective, and deep analysis of software projects by AI agents, bridging the gap between legacy code and modern large language models.
+LogiDoclet is a Javadoc Doclet that generates a machine-readable Prolog representation of your Java codebase. It is designed to make software projects more accessible for analysis by AI agents and large language models.
 
 ## The Problem
 In long-standing, in-house software projects, developer turnover is a significant challenge. New team members face a steep learning curve, trying to understand a large, complex codebase with incomplete or outdated documentation. This "knowledge gap" slows down development and hinders maintenance. Using AI to understand the code directly is often cost-prohibitive due to high token costs, context window limitations, and the low signal-to-noise ratio in raw source code.
 
 ## The Solution: A Semantic Indexer for Code
-LogiDoclet addresses these challenges by acting as a **semantic indexer**. Instead of asking an AI to read an entire library, LogiDoclet provides it with a map—a compact, structured, and unambiguous set of Prolog facts. It's the difference between giving an AI a library card catalog versus telling it to read every book on every shelf.
+LogiDoclet addresses these challenges by acting as a **semantic indexer**. It provides a compact, structured, and unambiguous set of Prolog facts representing the codebase, similar to a catalog for a library.
 
 ### Key Features
-*   **Massive Cost Reduction:** Drastically reduces token consumption (by over 90% in tests) for AI analysis compared to raw code.
+*   **Cost-Effective:** Significantly reduces token consumption (by over 90% in tests) for AI analysis compared to raw code.
 *   **High-Density Information:** Provides a noise-free, structured view of the codebase's architecture, types, and their relationships.
-*   **Enables Large-Scale Analysis:** The compact format allows an entire project's structure to fit within an AI's context window, enabling holistic architectural queries.
-*   **Bootstraps Knowledge Transfer:** Facilitates a powerful workflow for documenting legacy code and accelerating developer onboarding.
+*   **Enables Large-Scale Analysis:** The compact format allows an entire project's structure to fit within an AI's context window, enabling architectural queries.
+*   **Knowledge Transfer:** Facilitates a workflow for documenting legacy code and accelerating developer onboarding.
 
 ## How It Works: The Two-Phase Approach
 LogiDoclet is designed for an iterative loop that allows an AI to not only understand a codebase but to actively enrich it.
@@ -23,13 +23,13 @@ LogiDoclet is designed for an iterative loop that allows an AI to not only under
 First, run LogiDoclet to generate the **minimal** documentation. This version contains only the structural facts of your code (classes, methods, fields, relationships) without any comments. This serves as a low-cost, high-density "map" of the entire project.
 
 ### Phase 2: Incremental Enrichment (Full Version)
-This phase creates a virtuous cycle of analysis and documentation:
+This phase creates an iterative cycle of analysis and documentation:
 1.  **Targeted Analysis:** Using the minimal "map," the AI targets a specific section of the code (e.g., a single package).
 2.  **Deep Code Reading:** The AI reads the raw `.java` source files for *only that targeted section*.
-3.  **Generate Understanding:** The AI generates high-quality, descriptive Javadoc comments.
+3.  **Generate Documentation:** The AI generates descriptive Javadoc comments.
 4.  **Update Source Code:** These new Javadoc comments are written back into the `.java` files.
 5.  **Regenerate Enriched Docs:** LogiDoclet is run again, this time to generate the **full** version (with comments).
-6.  **Repeat:** The AI can now use the enriched documentation for even faster and more insightful analysis in the next cycle.
+6.  **Repeat:** The AI can now use the enriched documentation for more efficient analysis in the next cycle.
 
 ### Process Visualization
 

@@ -257,20 +257,20 @@ public class LogiDoclet implements Doclet {
             return false;
         }
 
-        // Copy gemini.md and java_metastructure.pl from resources to the root output directory
+        // Copy LLM-context.md and java_metastructure.pl from resources to the root output directory
         try (
-                java.io.InputStream geminiMdStream = LogiDoclet.class.getClassLoader().getResourceAsStream("gemini.md");
-                java.io.InputStream masterGeminiTemplateMdStream = LogiDoclet.class.getClassLoader().getResourceAsStream("master_gemini_template.md");
+                java.io.InputStream llmContextMdStream = LogiDoclet.class.getClassLoader().getResourceAsStream("LLM_context.md");
+                java.io.InputStream masterLlmContextTemplateMdStream = LogiDoclet.class.getClassLoader().getResourceAsStream("master_LLM_context_template.md");
                 java.io.InputStream javaMetastructureStream = LogiDoclet.class.getClassLoader().getResourceAsStream("java_metastructure.pl")
         ) {
 
-            if (geminiMdStream == null) {
-                reporter.print(Diagnostic.Kind.ERROR, "Resource 'gemini.md' not found in classpath.");
+            if (llmContextMdStream == null) {
+                reporter.print(Diagnostic.Kind.ERROR, "Resource 'LLM_context.md' not found in classpath.");
                 return false;
             }
 
-            if (masterGeminiTemplateMdStream == null) {
-                reporter.print(Diagnostic.Kind.ERROR, "Resource 'master_gemini_template.md' not found in classpath.");
+            if (masterLlmContextTemplateMdStream == null) {
+                reporter.print(Diagnostic.Kind.ERROR, "Resource 'master-LLM_context_template.md' not found in classpath.");
                 return false;
             }
 
@@ -279,13 +279,13 @@ public class LogiDoclet implements Doclet {
                 return false;
             }
 
-            Files.copy(geminiMdStream, outputDirectory.resolve("gemini.md"), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(llmContextMdStream, outputDirectory.resolve("LLM_context.md"), StandardCopyOption.REPLACE_EXISTING);
             Files.copy(javaMetastructureStream, outputDirectory.resolve("java_metastructure.pl"), StandardCopyOption.REPLACE_EXISTING);
-            reporter.print(Diagnostic.Kind.NOTE, "Copied gemini.md and java_metastructure.pl to " + outputDirectory.toAbsolutePath());
+            reporter.print(Diagnostic.Kind.NOTE, "Copied LLM_context.md and java_metastructure.pl to " + outputDirectory.toAbsolutePath());
             Path templateDir = outputDirectory.resolve("templates");
             Files.createDirectories(templateDir);
-            Files.copy(masterGeminiTemplateMdStream, templateDir.resolve("master_gemini.md.template"), StandardCopyOption.REPLACE_EXISTING);
-            reporter.print(Diagnostic.Kind.NOTE, "Copied master_gemini_template.md as master_gemini.md.template to " + templateDir.toAbsolutePath());
+            Files.copy(masterLlmContextTemplateMdStream, templateDir.resolve("master_LLM_context.md.template"), StandardCopyOption.REPLACE_EXISTING);
+            reporter.print(Diagnostic.Kind.NOTE, "Copied master_LLM_context_template.md as master_LLM_context.md.template to " + templateDir.toAbsolutePath());
         } catch (IOException e) {
             reporter.print(Diagnostic.Kind.ERROR, "Error copying resource files: " + e.getMessage());
             e.printStackTrace();

@@ -13,7 +13,7 @@ Before attempting to parse any Prolog output, **always consult the metadata file
 
 This file defines all the Prolog predicates used, their arity (number of arguments), and the expected type and meaning of each argument. It is crucial for correctly interpreting the Prolog facts.
 
-**Location of Metadata:** The `java_metastructure.pl` file is copied to the *root* of the output directory (e.g., `target/test-output/java_metastructure.pl`). The `gemini.md` file itself is also copied to this root.
+**Location of Metadata:** The `java_metastructure.pl` file is copied to the *root* of the output directory (e.g., `target/test-output/java_metastructure.pl`). The `LLM-context.md` file itself is also copied to this root.
 
 ## 3. Step-by-Step Exploration Strategy
 
