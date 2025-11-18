@@ -1,6 +1,15 @@
 # LogiDoclet
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/grimch/logidoclet) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Javadoc](https://img.shields.io/badge/Javadoc-orange?style=for-the-badge&logo=java&logoColor=white)
+![RAG](https://img.shields.io/badge/RAG-blue?style=for-the-badge)
+![Token-Efficient](https://img.shields.io/badge/Token--Efficient-brightgreen?style=for-the-badge)
+[![Java 17+](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/grimch/logidoclet)](https://github.com/grimch/logidoclet/releases)
+[![GitHub stars](https://img.shields.io/github/stars/grimch/logidoclet)](https://github.com/grimch/logidoclet/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/grimch/logidoclet)](https://github.com/grimch/logidoclet/network)
+[![GitHub last commit](https://img.shields.io/github/last-commit/grimch/logidoclet)](https://github.com/grimch/logidoclet/commits/main)
+[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/grimch/logidoclet)](https://github.com/grimch/logidoclet)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 LogiDoclet is a Javadoc Doclet that generates a machine-readable Prolog representation of your Java codebase. It is designed to make software projects more accessible for analysis by AI agents and large language models.
 
@@ -172,6 +181,13 @@ LogiDoclet generates several files in the specified output directory (`-d` optio
 *   **`LLM_context.md`**: This Markdown file provides a high-level overview and context of the Java project, intended to be consumed directly by Large Language Models (LLMs). It summarizes the project's structure and key components, helping the LLM to quickly grasp the codebase's purpose and organization.
 *   **`templates/master_LLM_context.md.template`**: This file serves as a structured template for initializing AI tools like Claude Code and Gemini CLI. It is designed to be copied directly into your project's root directory (or a designated context directory for your AI tool) under a suitable name (e.g., `gemini.md` or `claude.md`). The AI tool is then expected to interpret this file, which contains references to `LLM_context.md` and the generated Prolog facts, to establish its initial context about the codebase. The template itself does not require manual placeholder replacement by the user.
 
+### Formatted Prolog Output Example
+
+To illustrate the output of LogiDoclet, you can examine the Java classes used for unit testing and their corresponding expected formatted Prolog representation. The `-prettyPrint` option was used to generate this output.
+
+*   **Sample Java Source Files:** [`src/test/resources/sample_module`](./src/test/resources/sample_module)
+*   **Expected Formatted Prolog Output Files:** [`src/test/resources/expected_output/full`](./src/test/resources/expected_output/full)
+
 ---
 ## Developer Guide
 
@@ -222,12 +238,14 @@ graph TD
     │   │   └── io/github/grimch/doclet
     │   │       ├── LogiDoclet.java         # Main doclet entry point
     │   │       └── prolog
-    │   │           ├── PrologVisitor.java  # Traverses the Java AST
-    │   │           ├── DocletPrologWriter.java # Writes facts to files
-    │   │           ├── PrettyPrinter.java # Formats output for better readability (note that this will make tokenizazion less efficient).
-    │   │           └── *.java              # Prolog data model (Term, Fact, etc.)
+    │   │           ├── PrologVisitor.java       # Traverses the Java AST
+    │   │           ├── DocletPrologWriter.java  # Writes facts to files
+    │   │           ├── PrettyPrinter.java       # Formats output for better readability (note that this will make tokenizazion less efficient).
+    │   │           └── *.java                   # Prolog data model (Term, Fact, etc.)
     │   └── resources
-    │       └── java_metastructure.pl # Defines the Prolog schema for the facts
+    │       └── java_metastructure.pl            # Defines the Prolog schema for the facts
+    │       └── jLLM_context.md                  # Information for the LLM how to use/traverse the javadoc information.
+    │       └── master_LLM_context_template.md   # A template for the initial context file at the project root folder (see above).
     └── test
         ├── java                        # Unit and integration tests
         └── resources
