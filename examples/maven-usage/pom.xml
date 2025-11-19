@@ -25,33 +25,59 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${maven.javadoc.plugin.version}</version>
-                <configuration>
+                <version>${maven.javadoc.plugin.version}</version>	
+				<configuration>
 					<!-- uncomment next two lines for troubleshooting -->
-					<!-- debug>true</debug -->
-					<!-- verbose>true</verbose -->
-					<!-- This is necessary because otherwise LogiDoclet will respective parameter -->
-					<disableNoFonts>true</disableNoFonts>
-					<subpackages>io.github.grimch.doclet.sample_module</subpackages>
-                    <doclet>io.github.grimch.doclet.LogiDoclet</doclet>
-                    <docletArtifact>
-                        <groupId>io.github.grimch</groupId>
-                        <artifactId>logidoclet</artifactId>
-                        <version>${logidoclet.version}</version>
-                    </docletArtifact>
-                    <useStandardDocletOptions>false</useStandardDocletOptions>
-					<additionalOptions>
-                        <!-- Pass the output directory to your custom doclet -->  					
-						<additionalOption>-d ${logidoc.output.directory}</additionalOption>
-                        <!-- Pass the outputCommentary flag -->					
-                        <!-- Comment out the line below to enable full output -->
-						<additionalOption>-outputCommentary</additionalOption>
-                        <!-- Pass the prettyPrint flag -->
-                        <!-- Comment out the line below to enable full output -->
-                        <!-- Note: tokenization is more efficient wit this disabled -->
-						<additionalOption>-prettyPrint</additionalOption>
-					</additionalOptions>
-                </configuration>
+					<debug>true</debug>
+					<verbose>true</verbose>
+				</configuration>
+				
+                <executions>				
+                    <execution>
+                        <id>default-javadoc</id>
+						<phase>compile</phase>						
+                        <goals>
+                            <goal>javadoc</goal>
+                        </goals>
+						<configuration>
+							<classifier>default-javadoc</classifier>
+							<outputDirectory>${project.build.directory}/javadoc</outputDirectory>
+							<show>private</show>
+						</configuration>						
+					</execution>
+				
+                    <execution>
+                        <id>logidoclet-javadoc</id>
+						<phase>compile</phase>
+                        <goals>
+                            <goal>javadoc</goal>
+                        </goals>
+						<configuration>
+							<classifier>logidoclet-javadoc</classifier>
+							<!-- uncomment next two lines for troubleshooting -->
+							<!-- The next is necessary because otherwise LogiDoclet will respective parameter -->
+							<disableNoFonts>true</disableNoFonts>
+							<doclet>io.github.grimch.doclet.LogiDoclet</doclet>
+							<docletArtifact>
+								<groupId>io.github.grimch</groupId>
+								<artifactId>logidoclet</artifactId>
+								<version>${logidoclet.version}</version>
+							</docletArtifact>
+							<useStandardDocletOptions>false</useStandardDocletOptions>
+							<additionalOptions>
+								<!-- Pass the output directory to your custom doclet -->
+								<additionalOption>-d ${logidoc.output.directory}</additionalOption>
+								<!-- Pass the outputCommentary flag -->
+								<!-- Comment out the line below to enable full output -->
+								<additionalOption>-outputCommentary</additionalOption>
+								<!-- Pass the prettyPrint flag -->
+								<!-- Comment out the line below to enable full output -->
+								<!-- Note: tokenization is more efficient wit this disabled -->
+								<additionalOption>-prettyPrint</additionalOption>
+							</additionalOptions>
+						</configuration>						
+                    </execution>										
+                </executions>
             </plugin>
         </plugins>
     </build>

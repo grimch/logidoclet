@@ -13,10 +13,9 @@
 
 LogiDoclet is a Javadoc Doclet that generates a machine-readable Prolog representation of your Java codebase. It is designed to make software projects more accessible for analysis by AI agents and large language models.
 
-## The Problem
+## Motivation for LogiDoclet
 In long-standing, in-house software projects, developer turnover is a significant challenge. New team members face a steep learning curve, trying to understand a large, complex codebase with incomplete or outdated documentation. This "knowledge gap" slows down development and hinders maintenance. Using AI to understand the code directly is often cost-prohibitive due to high token costs, context window limitations, and the low signal-to-noise ratio in raw source code.
 
-## The Solution: A Semantic Indexer for Code
 LogiDoclet addresses these challenges by acting as a **semantic indexer**. It provides a compact, structured, and unambiguous set of Prolog facts representing the codebase, similar to a catalog for a library.
 
 ### Key Features
@@ -25,45 +24,8 @@ LogiDoclet addresses these challenges by acting as a **semantic indexer**. It pr
 *   **Enables Large-Scale Analysis:** The compact format allows an entire project's structure to fit within an AI's context window, enabling architectural queries.
 *   **Knowledge Transfer:** Facilitates a workflow for documenting legacy code and accelerating developer onboarding.
 
-## How It Works: The Two-Phase Approach
-LogiDoclet is designed for an iterative loop that allows an AI to not only understand a codebase but to actively enrich it.
+___
 
-### Phase 1: Initial Scaffolding (Minimal Version)
-First, run LogiDoclet to generate the **minimal** documentation. This version contains only the structural facts of your code (classes, methods, fields, relationships) without any comments. This serves as a low-cost, high-density "map" of the entire project.
-
-### Phase 2: Incremental Enrichment (Full Version)
-This phase creates an iterative cycle of analysis and documentation:
-1.  **Targeted Analysis:** Using the minimal "map," the AI targets a specific section of the code (e.g., a single package).
-2.  **Deep Code Reading:** The AI reads the raw `.java` source files for *only that targeted section*.
-3.  **Generate Documentation:** The AI generates descriptive Javadoc comments.
-4.  **Update Source Code:** These new Javadoc comments are written back into the `.java` files.
-5.  **Regenerate Enriched Docs:** LogiDoclet is run again, this time to generate the **full** version (with comments).
-6.  **Repeat:** The AI can now use the enriched documentation for more efficient analysis in the next cycle.
-
-### Process Visualization
-
-#### Overall Process
-```mermaid
-graph TD
-    A[Legacy Java Project] --> B{"Run LogiDoclet (minimal)"};
-    B --> C[Minimal Prolog Docs];
-    C --> D["Phase 2: AI Enrichment Cycle"];
-    D --> E[Enriched Javadoc in .java Files];
-    E --> F[Well-Documented, AI-Navigable Project];
-```
-
-#### Phase 2 Enrichment Cycle
-```mermaid
-graph TD
-    A[Start with Minimal/Enriched Prolog Docs] --> B{1. AI targets a package};
-    B --> C[2. AI reads Prolog docs + Java source];
-    C --> D{3. AI generates Javadoc comments};
-    D --> E[4. Update .java files];
-    E --> F{"5. Run LogiDoclet (full version)"};
-    F --> G[New Enriched Prolog Docs];
-    G --> B;
-```
----
 ## User Guide
 
 There are two primary ways to use LogiDoclet: directly via the `javadoc` command-line tool, or as a plugin in a Maven build.
@@ -118,36 +80,65 @@ You can also integrate LogiDoclet directly into your project's `pom.xml` using t
 
 An example `pom.xml` is provided in the [`examples/maven-usage/`](./examples/maven-usage/) directory. You can adapt the `<plugin>` section from this file into your own project.
 
-Key configuration snippet from the example:
+Key configuration snippet from the example which shows how generate standard javadoc and LogiDoc output in parallel:
+
 ```xml
 <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-javadoc-plugin</artifactId>
     <version>${maven.javadoc.plugin.version}</version>
     <configuration>
+        <!-- uncomment next two lines for troubleshooting -->
         <debug>true</debug>
         <verbose>true</verbose>
-        <disableNoFonts>true</disableNoFonts>
-        <subpackages>io.github.grimch.doclet.sample_module</subpackages>
-        <doclet>io.github.grimch.doclet.LogiDoclet</doclet>
-        <docletArtifact>
-            <groupId>io.github.grimch</groupId>
-            <artifactId>logi-doclet</artifactId>
-            <version>${logi-doclet.version}</version>
-        </docletArtifact>
-        <useStandardDocletOptions>false</useStandardDocletOptions>
-        <additionalOptions>
-            <!-- Pass the output directory to your custom doclet -->
-            <additionalOption>-d ${logidoc.output.directory}</additionalOption>
-            <!-- Pass the outputCommentary flag -->
-            <!-- Uncomment the line below to enable commentary output -->
-            <!-- additionalOption>-outputCommentary</additionalOption -->
-            <!-- Pass the prettyPrint flag -->
-            <!-- Comment out the line below to enable full output -->
-            <!-- Note: tokenization is more efficient wit this disabled -->
-            <!-- additionalOption>-prettyPrint</additionalOption -->
-        </additionalOptions>
     </configuration>
+
+    <executions>
+        <execution>
+            <id>default-javadoc</id>
+            <phase>compile</phase>
+            <goals>
+                <goal>javadoc</goal>
+            </goals>
+            <configuration>
+                <classifier>default-javadoc</classifier>
+                <outputDirectory>${project.build.directory}/javadoc</outputDirectory>
+                <show>private</show>
+            </configuration>
+        </execution>
+
+        <execution>
+            <id>logidoclet-javadoc</id>
+            <phase>compile</phase>
+            <goals>
+                <goal>javadoc</goal>
+            </goals>
+            <configuration>
+                <classifier>logidoclet-javadoc</classifier>
+                <!-- uncomment next two lines for troubleshooting -->
+                <!-- The next is necessary because otherwise LogiDoclet will respective parameter -->
+                <disableNoFonts>true</disableNoFonts>
+                <doclet>io.github.grimch.doclet.LogiDoclet</doclet>
+                <docletArtifact>
+                    <groupId>io.github.grimch</groupId>
+                    <artifactId>logidoclet</artifactId>
+                    <version>${logidoclet.version}</version>
+                </docletArtifact>
+                <useStandardDocletOptions>false</useStandardDocletOptions>
+                <additionalOptions>
+                    <!-- Pass the output directory to your custom doclet -->
+                    <additionalOption>-d ${logidoc.output.directory}</additionalOption>
+                    <!-- Pass the outputCommentary flag -->
+                    <!-- Comment out the line below to enable full output -->
+                    <additionalOption>-outputCommentary</additionalOption>
+                    <!-- Pass the prettyPrint flag -->
+                    <!-- Comment out the line below to enable full output -->
+                    <!-- Note: tokenization is more efficient wit this disabled -->
+                    <additionalOption>-prettyPrint</additionalOption>
+                </additionalOptions>
+            </configuration>
+        </execution>
+    </executions>
 </plugin>
 ```
 #### Standalone Example Project
@@ -169,8 +160,10 @@ To make it easy to experiment, a complete, runnable Maven example is provided in
         ```
 3.  **Run the Maven javadoc plugin:**
     ```bash
-    mvn clean javadoc:javadoc
+    mvn clean compile
     ```
+    **Note that you need to explitly run Maven `compile` phase and not `javadoc:javadoc` goal for maven to run both executions!**
+
     The Prolog documentation will be generated in the `examples/maven-usage/build/prolog-docs` directory. Output will be full output (inlcuding comments) and formatted.
 
 ### Output Files and AI Tool Integration
@@ -258,6 +251,8 @@ graph TD
 2.  **`PrologVisitor`**: A `SimpleElementVisitor9` that does the core work. It traverses the AST elements (modules, packages, types, methods) provided by the Doclet API.
 3.  **Prolog Data Model (`Term`, `Fact`, `Atom`, `PrologList`)**: A set of classes that represent Prolog constructs. The `PrologVisitor` builds a tree of these objects, which can then be serialized into valid Prolog syntax via their `toString()` methods.
 4.  **`DocletPrologWriter`**: Manages the creation of the output directory structure and writes the generated Prolog facts into `.pl` files.
+
+---
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.

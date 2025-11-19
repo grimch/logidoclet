@@ -115,7 +115,7 @@ public class LogiDocletTest {
                 "-d", outputDir.toString(),
                 "-outputCommentary",
                 "-prettyPrint",
-                "--source-path", "src/test/resources/sample_module",
+                "-sourcepath", "src/test/resources/sample_module",
                 "-subpackages",  "io.github.grimch.doclet.sample_module"
         };
         testDoclet(args, "full");
