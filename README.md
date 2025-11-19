@@ -14,15 +14,11 @@
 LogiDoclet is a Javadoc Doclet that generates a LLM-friendly representation of your Java codebase. It is designed to make software projects more accessible for analysis by AI agents and large language models.
 
 ## Motivation for LogiDoclet
-In long-standing, in-house software projects, developer turnover is a significant challenge. New team members face a steep learning curve, trying to understand a large, complex codebase with incomplete or outdated documentation. This "knowledge gap" slows down development and hinders maintenance. Using AI to understand the code directly is often cost-prohibitive due to high token costs, context window limitations, and the low signal-to-noise ratio in raw source code.
+In long-standing, in-house software projects, developer turnover is a significant challenge. New team members face a steep learning curve, trying to understand a large, complex codebase with incomplete or outdated documentation.
 
-LogiDoclet addresses these challenges by acting as a **semantic indexer**. It provides a compact, structured, and unambiguous set of Prolog facts representing the codebase, similar to a catalog for a library.
+This "knowledge gap" slows down development and hinders maintenance. Using AI to understand the code directly is often cost-prohibitive due to high token costs and context window limitations.
 
-### Key Features
-*   **Cost-Effective:** Significantly reduces token consumption (by over 90% in tests) for AI analysis compared to raw code.
-*   **High-Density Information:** Provides a noise-free, structured view of the codebase's architecture, types, and their relationships.
-*   **Enables Large-Scale Analysis:** The compact format allows an entire project's structure to fit within an AI's context window, enabling architectural queries.
-*   **Knowledge Transfer:** Facilitates a workflow for documenting legacy code and accelerating developer onboarding.
+LogiDoclet addresses these challenges by acting as a **semantic indexer**, which provides a compact, structured, and unambiguous set of facts representing the codebase.
 
 ___
 
@@ -30,7 +26,7 @@ ___
 
 There are two primary ways to use LogiDoclet: directly via the `javadoc` command-line tool, or as a plugin in a Maven build.
 
-### 1. Direct `javadoc` Execution
+### 1. Direct javadoc Execution
 
 To use LogiDoclet, you invoke the standard `javadoc` tool and specify `LogiDoclet` as the doclet. This method is useful for quick analysis or for use in non-Maven projects.
 
