@@ -1,0 +1,71 @@
+plugins {
+    id 'java'
+}
+
+ext {
+    javaVersion = '17'
+    logidocletVersion = '1.0.0'
+    logidocOutputDirectory = layout.buildDirectory.dir("../llm-context/prolog-doc")
+}
+
+group = 'io.github.grimch'
+version = '1.0.0'
+java.sourceCompatibility = ext.javaVersion
+java.targetCompatibility = ext.javaVersion
+
+
+configurations {
+    logidoclet
+}
+
+repositories {
+    mavenLocal() 
+    mavenCentral() // Fallback for other dependencies}
+}
+
+dependencies {
+    logidoclet "io.github.grimch:logidoclet:1.0.0"
+}
+
+tasks.register('defaultJavadoc', Javadoc) {
+   source = sourceSets.main.allJava
+    classpath = sourceSets.main.compileClasspath
+    destinationDir = file("${buildDir}/javadoc")
+    options.showAll()
+}
+
+tasks.register('logidocletJavadoc', Javadoc) {
+    source = sourceSets.main.allJava
+    classpath = sourceSets.main.compileClasspath
+    destinationDir = logidocOutputDirectory.get().asFile
+	title = null;
+		
+    options.author = false
+    options.version = false
+	options.noTimestamp = false	
+    options.windowTitle = null
+    options.docTitle = null
+    options.footer = null
+	
+	options.addBooleanOption('no-fonts', true)
+    options.doclet = 'io.github.grimch.doclet.LogiDoclet'
+	options.docletpath = configurations.logidoclet.files.asType(List)
+	
+    // Pass the output directory to your custom doclet
+    // options.addStringOption('-d', logidocOutputDirectory.get().asFile.absolutePath)
+    // Pass the outputCommentary flag
+    // Comment out the line below to enable full output
+    options.addStringOption('outputCommentary', 'true')
+    // Pass the prettyPrint flag
+    // Comment out the line below to enable full output
+    // Note: tokenization is more efficient with this disabled
+    options.addStringOption('prettyPrint', 'true')
+}
+
+configurations {
+    doclet
+}
+
+dependencies {
+    doclet "io.github.grimch:logidoclet:${logidocletVersion}"
+}

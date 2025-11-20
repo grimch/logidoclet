@@ -142,9 +142,7 @@ public class LogiDoclet implements Doclet {
                 },
                 new Option() { // New Option for outputCommentary
                     @Override
-                    public int getArgumentCount() {
-                        return 0; // No argument needed for a boolean flag
-                    }
+                    public int getArgumentCount() { return 1; }
 
                     @Override
                     public String getDescription() {
@@ -163,23 +161,22 @@ public class LogiDoclet implements Doclet {
 
                     @Override
                     public String getParameters() {
-                        return ""; // No parameters
+                        return "<boolean>"; // No parameters
                     }
 
                     @Override
                     public boolean process(String option, java.util.List<String> arguments) {
-                        if (option.equals("-outputCommentary")) {
-                            outputCommentary = true;
+                        if (arguments != null && arguments.size() == 1) {
+                            outputCommentary = Boolean.valueOf(arguments.get(0));
                             return true;
                         }
+                        reporter.print(Diagnostic.Kind.ERROR, "Option -outputCommentary requires a boolean argument.");
                         return false;
                     }
                 },
                 new Option() { // New Option for prettyPrint
                     @Override
-                    public int getArgumentCount() {
-                        return 0; // No argument needed for a boolean flag
-                    }
+                    public int getArgumentCount() { return 1; }
 
                     @Override
                     public String getDescription() {
@@ -198,16 +195,40 @@ public class LogiDoclet implements Doclet {
 
                     @Override
                     public String getParameters() {
-                        return ""; // No parameters
+                        return "<boolean>"; // No parameters
                     }
 
                     @Override
                     public boolean process(String option, java.util.List<String> arguments) {
-                        if (option.equals("-prettyPrint")) {
-                            prettyPrint = true;
+                        if (arguments != null && arguments.size() == 1) {
+                            prettyPrint = Boolean.valueOf(arguments.get(0));
                             return true;
                         }
+                        reporter.print(Diagnostic.Kind.ERROR, "Option -prettyPrint requires a boolean argument.");
                         return false;
+                    }
+                },
+
+                new Option() { // -no-fonts option to please Gradle
+                    @Override
+                    public int getArgumentCount() { return 0; }
+
+                    @Override
+                    public String getDescription() { return "-no-fonts dummy for Gradle"; }
+
+                    @Override
+                    public Option.Kind getKind() { return Doclet.Option.Kind.STANDARD; }
+
+                    @Override
+                    public java.util.List<String> getNames() { return java.util.List.of("-no-fonts"); }
+
+                    @Override
+                    public String getParameters() { return ""; }
+
+                    @Override
+                    public boolean process(String option, java.util.List<String> arguments) {
+                        reporter.print(Diagnostic.Kind.WARNING, "ignoring option: " + option);
+                        return true;
                     }
                 }
         );

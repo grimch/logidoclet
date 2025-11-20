@@ -1,0 +1,51 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+ext {
+    projectBuildSourceEncoding = 'UTF-8'
+    javaVersion = '17'
+	junitJupiterVersion = '6.0.1'
+	logiDocletVersion = '1.0.0'
+}
+
+group = 'io.github.grimch'
+version = '1.0.0'
+java.sourceCompatibility = ext.javaVersion
+java.targetCompatibility = ext.javaVersion
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher:$junitJupiterVersion"
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "$projectBuildSourceEncoding"
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = "$projectBuildSourceEncoding"
+}
+
+// Configure Maven Metadata (Maps to <name>, <description>, <url>, <licenses>)
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'io.github.grimch'
+            artifactId = 'logidoclet'
+            version = "$logiDocletVersion"
+            from components.java
+		}
+    }
+}

@@ -1,5 +1,7 @@
 /target/
+/build/
 /attic/
+/.gradle/
 !.mvn/wrapper/maven-wrapper.jar
 .idea
 *.iws
@@ -8,3 +10,5 @@
 /examples/maven-usage/llm-context/
 /examples/maven-usage/src/
 /examples/maven-usage/target/
+/examples/maven-usage/build/
+/examples/maven-usage/.gradle/

@@ -9,8 +9,8 @@
     <packaging>jar</packaging>
 
     <name>LogiDoclet</name>
-    <description>A custom Doclet to generate Prolog documentation for Java source code.</description>
-    <url>http://www.example.com</url>
+    <description>A custom Doclet to generate AI-friendly documentation for Java source code.</description>
+    <url>https://github.com/grimch/logidoclet</url>
 
     <licenses>
         <license>
