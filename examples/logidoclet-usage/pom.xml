@@ -17,7 +17,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <maven.javadoc.plugin.version>3.11.3</maven.javadoc.plugin.version>
         <logidoclet.version>1.0.0</logidoclet.version>
-        <logidoc.output.directory>${project.build.directory}/../llm-context/prolog-doc</logidoc.output.directory>
+        <logidoc.output.directory>${project.build.directory}/..llm-context/apidocs</logidoc.output.directory>
     </properties>
 
     <build>

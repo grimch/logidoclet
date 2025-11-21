@@ -63,8 +63,8 @@ public class DocletPrologWriter {
      * @param indexFact The top-level fact for the index.
      * @throws IOException If an I/O error occurs while writing the file.
      */
-    public void writeIndexFile(Fact indexFact) throws IOException {
-        writeFactToFile("", "index", indexFact);
+    public void writeIndexFile(Fact indexFact, String indexType) throws IOException {
+        writeFactToFile("", indexType, indexFact);
     }
 
     /**

@@ -7,8 +7,8 @@
 *.iws
 *.iml
 *.ipr
-/examples/maven-usage/llm-context/
-/examples/maven-usage/src/
-/examples/maven-usage/target/
-/examples/maven-usage/build/
-/examples/maven-usage/.gradle/
+/examples/logidoclet-usage/llm-context/
+/examples/logidoclet-usage/src/
+/examples/logidoclet-usage/target/
+/examples/logidoclet-usage/build/
+/examples/logidoclet-usage/.gradle/

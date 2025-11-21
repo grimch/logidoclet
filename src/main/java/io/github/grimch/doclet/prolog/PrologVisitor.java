@@ -61,6 +61,7 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
     private final Reporter reporter;
     private final boolean outputCommentary;
     private final List<Term> indexModuleList = new ArrayList<>();
+    private final List<Term> indexPackageList = new ArrayList<>();
     private List<Fact> packageMembers = null;
     private List<Fact> typeMembers = null;
     private final Types typeUtils;
@@ -154,11 +155,14 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         e.getEnclosedElements().forEach(element -> element.accept(this, p));
 
         // construct and write package
+        Atom packageNameAtom = new Atom(packageName);
         Fact packageFact = new Fact(
            "package_declaration",
-            new Atom(packageName), new PrologList(new ArrayList<>(packageMembers))
+                packageNameAtom,
+                new PrologList(new ArrayList<>(packageMembers))
         );
         writer.writePackageSummaryFile(packageName, packageFact);
+        indexPackageList.add(packageNameAtom);
         return null;
     }
 
@@ -696,12 +700,31 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
     }
 
     /**
-     * Returns the final index fact, which contains a list of all modules processed.
+     * Tells if the underlying source has any modules defined or just packages.
      *
-     * @return A {@link Fact} representing the top-level index.
+     * @return A boolean which tells if the underlying source has any modules defined or just packages.
      */
-    public Fact getIndex() {
-        return new Fact("index", new PrologList(indexModuleList));
+    public boolean hasModulesDefined() {
+        return ! indexModuleList.isEmpty();
     }
+
+    /**
+     * Returns the final index fact, which contains a list of all modules  processed.
+     *
+     * @return A {@link Fact} representing the top-level index for modules.
+     */
+    public Fact getModuleIndex() {
+        return new Fact("module_index", new PrologList(indexModuleList));
+    }
+
+    /**
+     * Returns the final index fact, which contains a list of all packages processed.
+     *
+     * @return A {@link Fact} representing the top-level index for packages.
+     */
+    public Fact getPackageIndex() {
+        return new Fact("package_index", new PrologList(indexPackageList));
+    }
+
 }
 

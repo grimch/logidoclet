@@ -13,18 +13,30 @@
 
 LogiDoclet is a Javadoc Doclet that generates a LLM-friendly representation of your Java codebase. It is designed to make software projects more accessible for analysis by AI agents and large language models.
 
-## Motivation for LogiDoclet
-In long-standing, in-house software projects, developer turnover is a significant challenge. New team members face a steep learning curve, trying to understand a large, complex codebase with incomplete or outdated documentation.
+## Motivation for LogiDoclet: Javadoc must become AI-friendly
+As human Java developers, if we need more information about a library's API, we consult API documentation like Javadoc, which gives us detailed descriptions of public and protected classes, interfaces, constructors, methods, fields, class inheritance, and so on.
 
-This "knowledge gap" slows down development and hinders maintenance. Using AI to understand the code directly is often cost-prohibitive due to high token costs and context window limitations.
+The problem with Javadoc however, when looking from the AI perspective, is that it is Presentation-Oriented, designed for human eyes. Information is embedded within complex HTML tags, CSS classes, and scripts. This requires high effort and high token consumption for the LLM to process.
+
+What the AI truly prefers is a compact, logical, structured, and unambiguous set of 'facts.' which makes the same it instantly machine-readable.
 
 LogiDoclet addresses these challenges by acting as a **semantic indexer**, which provides a compact, structured, and unambiguous set of facts representing the codebase.
+
+**Major usage scenarios:**
+*  **Integrated Development Environments** are parsing your source files to build an internal representation of the code called an Abstract Syntax Tree (AST). When required information from external libraries/binaries is retrieved from their repective bytecode metadata.<br>
+**Code Assistance plugins** hace access to this, but it lacks any information about libraries or frameworks not used yet in the project, which is th typical scenario when you do a major (re-)design.<br>
+It would therefore help a lot, if the repective projects generate an additional AI-friendly Javadoc version. 
+
+* **Command Line AI Code assistance tools** like **Gemini CLI** do not have access to any AST based information. They completely rely on analysing the code "ad-hoc" resulting in hight token consumption.<br>
+LogiDoclet will provide them at least to the **full API documentation of their project**, therefor reducing the need for direct code analysis substantially.
 
 ___
 
 ## User Guide
 
-There are two primary ways to use LogiDoclet: directly via the `javadoc` command-line tool, or as a plugin in a Maven build.
+There are two primary ways to use LogiDoclet:
+* Directly via the `javadoc` command-line tool
+* As a plugin in a Gradle / Maven build.
 
 ### 1. Direct javadoc Execution
 
@@ -54,7 +66,7 @@ javadoc -doclet io.github.grimch.doclet.LogiDoclet \
 **Generating docs for the included sample:**
 This command generates Prolog facts for the sample code included in this repository's test resources.
 ```bash
-# Assumes you have built the project with 'mvn clean install'
+# Assumes you have built the project with 'mvn clean install, for a Gradle build, the library is located in build/libs directory
 javadoc -doclet io.github.grimch.doclet.LogiDoclet \
         -docletpath 'target/logidoclet-1.0.0.jar' \
         -d build/prolog-sample-docs \
@@ -64,7 +76,7 @@ javadoc -doclet io.github.grimch.doclet.LogiDoclet \
 
 ### 2. Usage with Maven
 
-You can also integrate LogiDoclet directly into your project's `pom.xml` using the `maven-javadoc-plugin`.
+You can integrate LogiDoclet directly into your project's `pom.xml` using the `maven-javadoc-plugin`.
 
 #### Setup
 1.  **Install LogiDoclet Locally:** Since it is not yet available on Maven Central. You must build and install it locally first:
@@ -74,7 +86,7 @@ You can also integrate LogiDoclet directly into your project's `pom.xml` using t
     ```
 2.  **Configure Your `pom.xml`:** Add the `maven-javadoc-plugin` to your project's `pom.xml` and configure it to use LogiDoclet.
 
-An example `pom.xml` is provided in the [`examples/maven-usage/`](./examples/maven-usage/) directory. You can adapt the `<plugin>` section from this file into your own project.
+An example `pom.xml` is provided in the [`examples/logidoclet-usage/`](./examples/logidoclet-usage/) directory. You can adapt the `<plugin>` section from this file into your own project.
 
 Key configuration snippet from the example which shows how generate standard javadoc and LogiDoc output in parallel:
 
@@ -136,14 +148,80 @@ Key configuration snippet from the example which shows how generate standard jav
         </execution>
     </executions>
 </plugin>
+
 ```
+
+### 3. Usage with Gradle
+
+You can integrate LogiDoclet directly into your project's `build.gradle` by registering  `logidocletJavadoc` task.
+
+#### Setup
+1.  **Install LogiDoclet Locally:** Since it is not yet available on Maven Central. You must build and install it locally first:
+    ```bash
+    # In the logidoclet project directory
+    gradle clean publishToMavenLocal
+    ```
+2.  **Configure Your `pom.xml`:** Add the `maven-javadoc-plugin` to your project's `pom.xml` and configure it to use LogiDoclet.
+
+An example `build.gradle` is provided in the [`examples/logidoclet-usage/`](./examples/logidoclet-usage/) directory. You can adapt the `logidoclet` configuration, dependency and task registration from this file into your own project.
+
+Key configuration snippet from the example which shows how generate standard javadoc and LogiDoc output in parallel:
+
+```groovy
+configurations {
+    logidoclet
+}
+
+dependencies {
+    logidoclet "io.github.grimch:logidoclet:1.0.0"
+}
+
+tasks.register('defaultJavadoc', Javadoc) {
+    source = sourceSets.main.allJava
+    classpath = sourceSets.main.compileClasspath
+    destinationDir = file("${buildDir}/javadoc")
+    options.showAll()
+}
+
+tasks.register('logidocletJavadoc', Javadoc) {
+    source = sourceSets.main.allJava
+    classpath = sourceSets.main.compileClasspath
+    destinationDir = logidocOutputDirectory.get().asFile
+    title = null
+
+    options.author = false
+    options.version = false
+    options.noTimestamp = false
+    options.windowTitle = null
+    options.docTitle = null
+    options.footer = null
+
+    options.addBooleanOption('no-fonts', true)
+    options.doclet = 'io.github.grimch.doclet.LogiDoclet'
+    options.docletpath = configurations.logidoclet.files.asType(List)
+
+    // Pass the output directory to your custom doclet
+    // options.addStringOption('-d', logidocOutputDirectory.get().asFile.absolutePath)
+    // Pass the outputCommentary flag
+    // Comment out the line below to enable full output
+    options.addStringOption('outputCommentary', 'true')
+    // Pass the prettyPrint flag
+    // Comment out the line below to enable full output
+    // Note: tokenization is more efficient with this disabled
+    options.addStringOption('prettyPrint', 'true')
+}
+```
+
+
+
+
 #### Standalone Example Project
-To make it easy to experiment, a complete, runnable Maven example is provided in the [`examples/maven-usage/`](./examples/maven-usage/) directory.
+To make it easy to experiment, a complete, runnable Maven example is provided in the [`examples/logidoclet-usage/`](./examples/logidoclet-usage/) directory.
 
 **To run the example:**
 1.  **Navigate to the example directory:**
     ```bash
-    cd examples/maven-usage
+    cd examples/logidoclet-usage
     ```
 2.  **Run the setup script:** This will copy the sample source from *src/test/resources/sample_module* into the example project.
     *   On Linux or macOS:
@@ -154,21 +232,28 @@ To make it easy to experiment, a complete, runnable Maven example is provided in
         ```cmd
         setup_example.bat
         ```
-3.  **Run the Maven javadoc plugin:**
-    ```bash
-    mvn clean compile
-    ```
-    **Note that you need to explitly run Maven `compile` phase and not `javadoc:javadoc` goal for maven to run both executions!**
+3. **Generate the Javadoc** 
+   * **Using Maven (Note that you need to explitly run Maven `compile` phase and not `javadoc:javadoc` goal for maven to run both executions!):**
+     ```bash
+     mvn clean compile
+     ```
+     ****
 
-    The Prolog documentation will be generated in the `examples/maven-usage/build/prolog-docs` directory. Output will be full output (inlcuding comments) and formatted.
+   * **Using Gradle:**
+     ```bash
+      gradle clean defaultJavadoc logidocletJavadoc
+     ```  
+In both cases the Prolog documentation will be generated in the `examples/logidoclet-usage/llm-context/apidocs` directory. Output will be full output (inlcuding comments) and formatted.
 
-### Output Files and AI Tool Integration
+Also for both cases standard Javadoc output will be generated as well is respective default output folders for comparison purposes.
 
-LogiDoclet generates several files in the specified output directory (`-d` option), which are crucial for AI agent integration:
+### Additional Output Files for AI Tool Integration
 
-*   **`java_metastructure.pl`**: This file defines the Prolog schema (predicates and their arities) used to represent the Java codebase. It's essential for any Prolog-based AI agent to correctly interpret the generated facts.
-*   **`LLM_context.md`**: This Markdown file provides a high-level overview and context of the Java project, intended to be consumed directly by Large Language Models (LLMs). It summarizes the project's structure and key components, helping the LLM to quickly grasp the codebase's purpose and organization.
-*   **`templates/master_LLM_context.md.template`**: This file serves as a structured template for initializing AI tools like Claude Code and Gemini CLI. It is designed to be copied directly into your project's root directory (or a designated context directory for your AI tool) under a suitable name (e.g., `gemini.md` or `claude.md`). The AI tool is then expected to interpret this file, which contains references to `LLM_context.md` and the generated Prolog facts, to establish its initial context about the codebase. The template itself does not require manual placeholder replacement by the user.
+LogiDoclet generates three files in the specified output directory (`-d` option), which are crucial for AI agent integration:
+
+*   **[`LLM_context.md`](src/main/resources/LLM_context.md)**: Algorithmic guide defining the steps an LLM must follow to parse the LogiDoclet Prolog Javadoc output.
+*   **[`java_metastructure.pl`](src/main/resources/java_metastructure.pl)**: This file defines the Prolog schema (predicates and their arities) used to represent the Java codebase. It's essential for any Prolog-based AI agent to correctly interpret the generated facts.
+*   **[`templates/master_LLM_context.md.template`](src/main/resources/master_LLM_context_template.md)**: This file serves as a structured template for initializing AI tools like Claude Code and Gemini CLI. It is designed to be copied directly into your project's root directory (or a designated context directory for your AI tool) under a suitable name (e.g., `gemini.md` or `claude.md`). The AI tool is then expected to interpret this file, which contains references to `LLM_context.md` and the generated Prolog facts, to establish its initial context about the codebase.
 
 ### Formatted Prolog Output Example
 
@@ -187,11 +272,16 @@ This guide provides information for developers who want to contribute to LogiDoc
 *   Apache Maven 3.6.0 or later.
 
 ### Building and Testing
-LogiDoclet is a standard Maven project. To build the project, run the tests, and install it in your local repository, execute:
+LogiDoclet can be built with either Maven or Gradle. To build the project, run the tests, and install it in your local repository, 
+execute either :
 ```bash
 mvn clean install
 ```
-This command will also run the integration test in `LogiDocletTest`, which generates Prolog facts for a sample project and compares them against an expected output.
+or
+```bash
+gradle clean publishToMavenLocal
+```
+This build will also run the integration test in `LogiDocletTest`, which generates Prolog facts for a sample project and compares them against an expected output.
 
 ### Core Concepts
 
@@ -232,7 +322,7 @@ graph TD
     │   │           ├── PrettyPrinter.java       # Formats output for better readability (note that this will make tokenizazion less efficient).
     │   │           └── *.java                   # Prolog data model (Term, Fact, etc.)
     │   └── resources
-    │       └── java_metastructure.pl            # Defines the Prolog schema for the facts
+    │       └── java_metastructure.pl            # Algorithmic guide defining the steps an LLM must follow to parse the LogiDoclet Prolog Javadoc output.
     │       └── jLLM_context.md                  # Information for the LLM how to use/traverse the javadoc information.
     │       └── master_LLM_context_template.md   # A template for the initial context file at the project root folder (see above).
     └── test

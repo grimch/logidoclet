@@ -329,7 +329,11 @@ public class LogiDoclet implements Doclet {
             for (Element element : environment.getIncludedElements()) {
                 element.accept(visitor, null);
             }
-            writer.writeIndexFile(visitor.getIndex());
+            if (visitor.hasModulesDefined()) {
+                writer.writeIndexFile(visitor.getModuleIndex(), "module_index");
+            } else {
+                writer.writeIndexFile(visitor.getPackageIndex(), "package_index");
+            }
             reporter.print(Diagnostic.Kind.NOTE, "Prolog fact generation completed successfully.");
             return true;
         } catch (IOException e) {

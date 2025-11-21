@@ -1,7 +1,10 @@
 % Any type not explicitly defined by a 'predicate_info' fact in this document is to be considered an atomic type.
 
-predicate_info(index, arity(1)).
-argument_info(index, 1, modules, type(list(module_name))).
+predicate_info(package_index, arity(1)).
+argument_info(package_index, 1, modules, type(list(package_name))).
+
+predicate_info(module_index, arity(1)).
+argument_info(module_index, 1, modules, type(list(module_name))).
 
 predicate_info(module, arity(7)).
 argument_info(module, 1, name, type(module_name)).

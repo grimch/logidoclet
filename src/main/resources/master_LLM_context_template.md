@@ -1,42 +1,35 @@
-# AI Interaction Guide
+# Project Knowledge Base & Navigation
 
----
+> **Note to Developer:** Append this content to your project's root-level AI instructions (e.g., `GEMINI.md`, `CLAUDE.md`, `.cursorrules`). Ensure the path `llm-context/apidocs/` matches your generation output.
 
-## Project Overview
+## 🧠 Information Retrieval Strategy
 
-> **Note to Project Maintainers:** Please fill in the placeholders below with information specific to this project.
-> 
-> **Copy this file to the root** ofg your project as GEMINI.md, CLAUDE.md, ... 
-*   **Project Name:** `[PROJECT_NAME]`
-*   **Goal:** `[PROJECT_GOAL]`
-*   **Build Command:** `[BUILD_COMMAND]`
-*   **Test Command:** `[TEST_COMMAND]`
+To understand this codebase efficiently and prevent hallucination, you must follow this strict hierarchy of information sources.
 
----
+**Step 0: Initialization**
+Before answering queries about the code, read **`llm-context/apidocs/LLM_context.md`**. This file contains the mandatory algorithmic logic for parsing the project's Prolog-based documentation.
 
-## Information Retrieval Workflow
-
-This document outlines the primary workflow for understanding and interacting with this codebase.
-
-At the start of our session, and whenever you need to understand the structure or details of the code, please follow the workflow specified in this diagram.
+**Step 1: The Retrieval Loop**
+Follow this decision tree to retrieve information with maximum token efficiency:
 
 ```mermaid
 graph TD
-    A[Start Session] --> B[Read<br>`llm-context/prolog-doc/LLM_context.md`<br>for detailed Prolog instructions];
-    B --> C{Need info for a task?};
-    C -- Yes --> D[**Priority 1:**<br>Consult Minimal Prolog Docs<br>`llm-context/prolog-doc/minimal`];
-    D --> E{Sufficient?};
-    E -- No --> F[**Priority 2:**<br>Consult Full Prolog Docs<br>`llm-context/prolog-doc/full`];
-    F --> G{Sufficient?};
-    G -- No --> H[**Priority 3:**<br>Read Source Code];
-    H --> I[Complete Task];
-    G -- Yes --> I;
-    E -- Yes --> I;
-    C -- No --> I;
+    Start([User Query]) --> Init[Load Parsing Logic<br>llm-context/apidocs/LLM_context.md]
+    Init --> Check{Info Needed?}
+    Check -- Yes --> Min[<b>Priority 1: Minimal Docs</b><br>llm-context/apidocs/minimal]
+    Min --> Suff{Sufficient?}
+    Suff -- Yes --> Answer([Answer User])
+    Suff -- No --> Full[<b>Priority 2: Full Docs + Javadoc</b><br>llm-context/apidocs/full]
+    Full --> Suff2{Sufficient?}
+    Suff2 -- Yes --> Answer
+    Suff2 -- No --> Source[<b>Priority 3: Raw Source Code</b><br>Read actual .java files]
+    Source --> Answer
+    Check -- No --> Answer
 ```
+## ⚡ Core Protocol
 
-### Key Principles:
-
-1.  **Prolog First:** The Prolog documentation is the primary source of truth for understanding the codebase structure, types, methods, and their relationships. For detailed instructions on how to parse this data, consult the `llm-context.md` file linked in the first step of the diagram.
-2.  **Minimal Before Full:** Always start with the `minimal` version to get a fast, token-efficient overview. Only use the `full` version (with comments) if the structural information is not enough.
-3.  **Code as Last Resort:** Only read the actual source files if the information cannot be found in either the minimal or full Prolog documentation.
+1.  **Source of Truth:** The Prolog facts in `llm-context/apidocs/` represent the authoritative structure of the project.
+2.  **Token Conservation:**
+    * **Always** attempt to resolve queries using the **Minimal** Prolog facts first.
+    * **Only** load the **Full** docs if you need natural language context (Javadoc) or deep intent analysis.
+    * **Last Resort:** Do not read raw source code files unless the Prolog documentation is missing the specific implementation detail required (e.g., inside a method body).

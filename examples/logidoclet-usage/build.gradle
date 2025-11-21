@@ -5,7 +5,7 @@ plugins {
 ext {
     javaVersion = '17'
     logidocletVersion = '1.0.0'
-    logidocOutputDirectory = layout.buildDirectory.dir("../llm-context/prolog-doc")
+    logidocOutputDirectory = layout.buildDirectory.dir("../llm-context/apidocs")
 }
 
 group = 'io.github.grimch'
@@ -13,14 +13,13 @@ version = '1.0.0'
 java.sourceCompatibility = ext.javaVersion
 java.targetCompatibility = ext.javaVersion
 
+repositories {
+    mavenLocal()
+    mavenCentral() // Fallback for other dependencies}
+}
 
 configurations {
     logidoclet
-}
-
-repositories {
-    mavenLocal() 
-    mavenCentral() // Fallback for other dependencies}
 }
 
 dependencies {
@@ -38,7 +37,7 @@ tasks.register('logidocletJavadoc', Javadoc) {
     source = sourceSets.main.allJava
     classpath = sourceSets.main.compileClasspath
     destinationDir = logidocOutputDirectory.get().asFile
-	title = null;
+	title = null
 		
     options.author = false
     options.version = false
@@ -60,12 +59,4 @@ tasks.register('logidocletJavadoc', Javadoc) {
     // Comment out the line below to enable full output
     // Note: tokenization is more efficient with this disabled
     options.addStringOption('prettyPrint', 'true')
-}
-
-configurations {
-    doclet
-}
-
-dependencies {
-    doclet "io.github.grimch:logidoclet:${logidocletVersion}"
 }
