@@ -50,9 +50,6 @@ tasks.register('logidocletJavadoc', Javadoc) {
     options.doclet = 'io.github.grimch.doclet.LogiDoclet'
 	options.docletpath = configurations.logidoclet.files.asType(List)
 	
-    // Pass the output directory to your custom doclet
-    // options.addStringOption('-d', logidocOutputDirectory.get().asFile.absolutePath)
-    // Pass the outputCommentary flag
     // Comment out ome of the two lines below to enable either only <minimal> or only  <full> output
     // options.addStringOption('outputMode', 'mimimal')
     // options.addStringOption('outputMode', 'full')
