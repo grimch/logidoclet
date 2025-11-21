@@ -52,7 +52,6 @@
                             <goal>javadoc</goal>
                         </goals>
                         <configuration>
-                            <!-- uncomment next two lines for troubleshooting -->
                             <!-- The next is necessary because otherwise LogiDoclet will respective parameter -->
                             <disableNoFonts>true</disableNoFonts>
                             <doclet>io.github.grimch.doclet.LogiDoclet</doclet>
