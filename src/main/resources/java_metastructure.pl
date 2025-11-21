@@ -1,3 +1,55 @@
+% META-DOCUMENTATION
+%
+% This file defines the schema for all other Prolog facts in this documentation set.
+% It serves as the single source of truth for understanding the structure of the data.
+
+% HOW TO BOOTSTRAP:
+%
+% To begin parsing the project structure, check for the existence of one of the
+% following entry-point predicates in the 'minimal/' directory:
+%
+%   1. module_index/1:  If present, the project is modular. Start here.
+%   2. package_index/1: If present, the project is non-modular. Start here.
+%
+% From the package names found, navigate to the corresponding '[package_path]/package.pl'
+% file, which contains type_declaration/2 facts for all types in that package.
+
+% SCHEMA PREDICATES:
+%
+% The schema is defined by two main predicates:
+%
+%   - predicate_info(PredicateName, arity(Arity)):
+%     Describes a predicate, its name, and its arity (number of arguments).
+%     Example: predicate_info(class, arity(10)).
+%
+%   - argument_info(PredicateName, ArgIndex, ArgName, type(TypeSpecifier)):
+%     Describes a specific argument of a predicate.
+%     - ArgIndex: The 1-based position of the argument.
+%     - ArgName: A human-readable name for the argument.
+%     - TypeSpecifier: A wrapper defining the data type of the argument.
+%
+%     Example: argument_info(class, 1, name, type(simple_name)).
+%     This means: "The first argument of the class/10 predicate is named 'name'
+%                  and its type is 'simple_name'."
+
+% TYPE REPRESENTATION:
+%
+% Types are represented using a structured hierarchy.
+%
+%   - A simple named type is a wrapper around an atom, e.g., simple_name('MyClass').
+%     The possible wrappers (simple_name, qualified_name, etc.) are defined throughout this file.
+%
+%   - A declared type is a fully qualified type, potentially with generics:
+%     declared_type(QualifiedName, TypeArguments).
+%     Example: declared_type('java.util.List', [declared_type('java.lang.String', [])]).
+%
+%   - A generic or primitive type representation uses the type/2 predicate:
+%     type(Kind, Detail).
+%     - 'Kind': The category of type, defined by type_kind_atom/1 (e.g., primitive, wildcard_extends).
+%     - 'Detail': The specific type name (for primitives) or its bound.
+%     Example (primitive): type(primitive, int).
+%     Example (generic):   type(wildcard_extends, declared_type('java.lang.Number', [])).
+
 % Any type not explicitly defined by a 'predicate_info' fact in this document is to be considered an atomic type.
 
 predicate_info(package_index, arity(1)).
@@ -197,3 +249,68 @@ argument_info(type_kind_atom, 1, name, type(atom)).
 
 predicate_info(modifier_keyword, arity(1)).
 argument_info(modifier_keyword, 1, name, type(atom)).
+
+% Defines the possible categories for a type declaration.
+type_category('CLASS').
+type_category('INTERFACE').
+type_category('ENUM').
+type_category('RECORD').
+type_category('ANNOTATION').
+
+% Defines the possible keywords for a modifier.
+modifier_keyword(public).
+modifier_keyword(protected).
+modifier_keyword(private).
+modifier_keyword(abstract).
+modifier_keyword(static).
+modifier_keyword(final).
+modifier_keyword(synchronized).
+modifier_keyword(volatile).
+modifier_keyword(transient).
+modifier_keyword(native).
+modifier_keyword(strictfp).
+modifier_keyword(sealed).
+modifier_keyword('non-sealed').
+
+% Defines the kinds of types, used in type/2, extends/2, etc.
+type_kind_atom(primitive).
+type_kind_atom(wildcard_extends).
+type_kind_atom(wildcard_super).
+type_kind_atom(wildcard).
+type_kind_atom(declared).
+
+% Defines the set of Java primitive types.
+predicate_info(primitive_type, arity(1)).
+argument_info(primitive_type, 1, name, type(atom)).
+
+primitive_type(boolean).
+primitive_type(byte).
+primitive_type(char).
+primitive_type(short).
+primitive_type(int).
+primitive_type(long).
+primitive_type(float).
+primitive_type(double).
+primitive_type(void).
+
+% --- EXECUTABLE SCHEMA RULES ---
+
+% Defines the valid entry-point predicates for project discovery.
+is_entry_point(module_index).
+is_entry_point(package_index).
+
+% Retrieves the type specifier for a given argument of a predicate.
+% Example: argument_type(class, 1, Type). -> Type = simple_name.
+argument_type(PredicateName, ArgIndex, TypeSpecifier) :-
+    argument_info(PredicateName, ArgIndex, _, type(TypeSpecifier)).
+
+% Succeeds if a given TypeName and Category form a valid type declaration
+% according to the master schema. It checks if the Category is a known one.
+is_valid_type_declaration(_TypeName, Category) :-
+    type_category(Category),
+    true.
+
+% Succeeds if a given ModifierKeyword is a valid modifier
+% according to the master schema.
+is_valid_modifier(ModifierKeyword) :-
+    modifier_keyword(ModifierKeyword).
