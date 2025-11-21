@@ -11,7 +11,7 @@
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/grimch/logidoclet)](https://github.com/grimch/logidoclet)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-LogiDoclet is a Javadoc Doclet that generates a LLM-friendly representation of your Java codebase. It is designed to make software projects more accessible for analysis by AI agents and large language models.
+LogiDoclet is a Javadoc Doclet that generates a LLM-friendly representation of your Java codebase. It is designed to make software projects more accessible for analysis by AI.
 
 ## Motivation for LogiDoclet: Javadoc must become AI-friendly
 As human Java developers, if we need more information about a library's API, we consult API documentation like Javadoc, which gives us detailed descriptions of public and protected classes, interfaces, constructors, methods, fields, class inheritance, and so on.
@@ -28,7 +28,7 @@ LogiDoclet addresses these challenges by acting as a **semantic indexer**, which
 It would therefore help a lot, if the repective projects generate an additional AI-friendly Javadoc version. 
 
 * **Command Line AI Code assistance tools** like **Gemini CLI** do not have access to any AST based information. They completely rely on analysing the code "ad-hoc" resulting in hight token consumption.<br>
-LogiDoclet will provide them at least to the **full API documentation of their project**, therefor reducing the need for direct code analysis substantially.
+LogiDoclet will provide them at least to the **full API documentation of a project**, therefore reducing the need for direct code analysis substantially.
 
 ___
 
