@@ -37,6 +37,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -47,12 +49,13 @@ import java.util.Set;
  * and generates a set of Prolog facts that describe the structure of the code, including modules, packages,
  * types (classes, interfaces, enums, records), methods, and fields.
  * <p>
- * It supports two modes of operation:
+ * It supports three modes of operation:
  * <ul>
  *     <li><b>minimal</b>: Generates facts about the code's structure without any Javadoc comments. This provides a
  *     high-level architectural overview.</li>
  *     <li><b>full</b>: Includes Javadoc comments in the generated facts, providing a richer, more detailed
  *     semantic representation.</li>
+ *     <li><b>both</b>: This will output both variants outlined above</li>
  * </ul>
  * The output is organized into a directory structure that mirrors the project's package structure, with an
  * index file for easy navigation.
@@ -64,10 +67,11 @@ import java.util.Set;
  * @see DocletPrologWriter
  */
 public class LogiDoclet implements Doclet {
+    record DocletProcessor(PrologVisitor visitor, DocletPrologWriter writer) {};
 
     private Reporter reporter;
     private Path outputDirectory;
-    private boolean outputCommentary = false;
+    private String outputMode = "both";
     private boolean prettyPrint = false;
 
     /**
@@ -96,7 +100,7 @@ public class LogiDoclet implements Doclet {
     /**
      * Returns the set of supported options for this doclet.
      * This doclet supports the standard {@code -d} option for specifying the output directory
-     * and a custom {@code -outputCommentary} flag to control whether Javadoc comments are included.
+     * and a custom {@code -outputMode} flag to control the output mode (minimal/full/both.
      * Additionally you can provide {@code -prettyPrint} flag to get output well formatted instead of single line.
      *
      * @return A set of supported {@link Doclet.Option}s.
@@ -140,13 +144,13 @@ public class LogiDoclet implements Doclet {
                         return false;
                     }
                 },
-                new Option() { // New Option for outputCommentary
+                new Option() { // New Option for outputMode
                     @Override
                     public int getArgumentCount() { return 1; }
 
                     @Override
                     public String getDescription() {
-                        return "Include Javadoc comments in the Prolog output.";
+                        return "Defines the mode of the Prolog output.";
                     }
 
                     @Override
@@ -156,7 +160,7 @@ public class LogiDoclet implements Doclet {
 
                     @Override
                     public java.util.List<String> getNames() {
-                        return java.util.List.of("-outputCommentary");
+                        return java.util.List.of("-outputMode");
                     }
 
                     @Override
@@ -167,10 +171,10 @@ public class LogiDoclet implements Doclet {
                     @Override
                     public boolean process(String option, java.util.List<String> arguments) {
                         if (arguments != null && arguments.size() == 1) {
-                            outputCommentary = Boolean.valueOf(arguments.get(0));
+                            outputMode = arguments.get(0);
                             return true;
                         }
-                        reporter.print(Diagnostic.Kind.ERROR, "Option -outputCommentary requires a boolean argument.");
+                        reporter.print(Diagnostic.Kind.ERROR, "Option -outputMode requires a mode argument.");
                         return false;
                     }
                 },
@@ -313,26 +317,32 @@ public class LogiDoclet implements Doclet {
             return false;
         }
 
-        Path actualOutputDirectory;
-        if (outputCommentary) {
-            actualOutputDirectory = outputDirectory.resolve("full");
-        } else {
-            actualOutputDirectory = outputDirectory.resolve("minimal");
+        List<DocletProcessor> docletProcessors = new ArrayList<>();
+
+        if (outputMode.equals("full") || outputMode.equals("both")) {
+            DocletPrologWriter writer = new DocletPrologWriter(outputDirectory.resolve("full"), prettyPrint);
+            PrologVisitor visitor = new PrologVisitor(writer, environment, reporter, true);
+            docletProcessors.add(new DocletProcessor(visitor, writer));
+        }
+        if (outputMode.equals("minimal") || outputMode.equals("both")) {
+            DocletPrologWriter writer = new DocletPrologWriter(outputDirectory.resolve("minimal"), prettyPrint);
+            PrologVisitor visitor = new PrologVisitor(writer, environment, reporter, false);
+            docletProcessors.add(new DocletProcessor(visitor, writer));
         }
 
-        reporter.print(Diagnostic.Kind.NOTE, "Generating Prolog facts to: " + actualOutputDirectory.toAbsolutePath());
-
-        DocletPrologWriter writer = new DocletPrologWriter(actualOutputDirectory, prettyPrint);
-        PrologVisitor visitor = new PrologVisitor(writer, environment, reporter, outputCommentary);
+        reporter.print(Diagnostic.Kind.NOTE, "Generating Prolog facts to: " + outputDirectory.toAbsolutePath());
 
         try {
             for (Element element : environment.getIncludedElements()) {
-                element.accept(visitor, null);
+                docletProcessors.stream().forEach(docletProcessor -> element.accept(docletProcessor.visitor(), null));
             }
-            if (visitor.hasModulesDefined()) {
-                writer.writeIndexFile(visitor.getModuleIndex(), "module_index");
-            } else {
-                writer.writeIndexFile(visitor.getPackageIndex(), "package_index");
+            for (DocletProcessor docletProcessor : docletProcessors) {
+                if (docletProcessor.visitor().hasModulesDefined()) {
+                    docletProcessor.writer().writeIndexFile(docletProcessor.visitor().getModuleIndex(), "module_index");
+                } else {
+                    docletProcessor.writer().writeIndexFile(docletProcessor.visitor().getPackageIndex(), "package_index");
+                }
+
             }
             reporter.print(Diagnostic.Kind.NOTE, "Prolog fact generation completed successfully.");
             return true;

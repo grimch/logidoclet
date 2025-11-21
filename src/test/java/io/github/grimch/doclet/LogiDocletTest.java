@@ -87,6 +87,7 @@ public class LogiDocletTest {
                 "-verbose",
                 "-doclet", LogiDoclet.class.getName(),
                 "-d", outputDir.toString(),
+                "-outputMode", "minimal",
                 "--source-path", "src/test/resources/sample_module",
                 "-subpackages",  "io.github.grimch.doclet.sample_module"
         };
@@ -113,7 +114,7 @@ public class LogiDocletTest {
                 "-verbose",
                 "-doclet", LogiDoclet.class.getName(),
                 "-d", outputDir.toString(),
-                "-outputCommentary", "true",
+                "-outputMode", "full",
                 "-prettyPrint", "true",
                 "-sourcepath", "src/test/resources/sample_module",
                 "-subpackages",  "io.github.grimch.doclet.sample_module"

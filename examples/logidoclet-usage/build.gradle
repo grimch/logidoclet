@@ -53,8 +53,9 @@ tasks.register('logidocletJavadoc', Javadoc) {
     // Pass the output directory to your custom doclet
     // options.addStringOption('-d', logidocOutputDirectory.get().asFile.absolutePath)
     // Pass the outputCommentary flag
-    // Comment out the line below to enable full output
-    options.addStringOption('outputCommentary', 'true')
+    // Comment out ome of the two lines below to enable either only <minimal> or only  <full> output
+    // options.addStringOption('outputMode', 'mimimal')
+    // options.addStringOption('outputMode', 'full')
     // Pass the prettyPrint flag
     // Comment out the line below to enable full output
     // Note: tokenization is more efficient with this disabled

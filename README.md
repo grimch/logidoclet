@@ -11,25 +11,35 @@
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/grimch/logidoclet)](https://github.com/grimch/logidoclet)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-LogiDoclet is a Javadoc Doclet that generates a LLM-friendly representation of your Java codebase. It is designed to make software projects more accessible for analysis by AI.
+# LogiDoclet: AI-Friendly API Documentation 💡
 
-## Motivation for LogiDoclet: Javadoc must become AI-friendly
-As human Java developers, if we need more information about a library's API, we consult API documentation like Javadoc, which gives us detailed descriptions of public and protected classes, interfaces, constructors, methods, fields, class inheritance, and so on.
+LogiDoclet is a **Javadoc Doclet** that generates a structured, LLM-friendly representation of your Java codebase. Its purpose is to make software projects instantly accessible and highly token-efficient for AI analysis.
 
-The problem with Javadoc however, when looking from the AI perspective, is that it is Presentation-Oriented, designed for human eyes. Information is embedded within complex HTML tags, CSS classes, and scripts. This requires high effort and high token consumption for the LLM to process.
+---
 
-What the AI truly prefers is a compact, logical, structured, and unambiguous set of 'facts.' which makes the same it instantly machine-readable.
+## Motivation: Why Traditional Javadoc Fails AI
 
-LogiDoclet addresses these challenges by acting as a **semantic indexer**, which provides a compact, structured, and unambiguous set of facts representing the codebase.
+While human developers rely on traditional Javadoc for API descriptions, this presentation-oriented format is highly inefficient for Large Language Models (LLMs):
 
-**Major usage scenarios:**
-*  **Integrated Development Environments** are parsing your source files to build an internal representation of the code called an Abstract Syntax Tree (AST). When required information from external libraries/binaries is retrieved from their repective bytecode metadata.<br>
-**Code Assistance plugins** hace access to this, but it lacks any information about libraries or frameworks not used yet in the project, which is th typical scenario when you do a major (re-)design.<br>
-It would therefore help a lot, if the repective projects generate an additional AI-friendly Javadoc version. 
+* **High Token Cost:** Information is buried within complex HTML, CSS, and scripts, forcing the LLMs to spend vast tokens and processing time merely to extract the code's structure.
+* **Low Clarity:** The output is ambiguous and lacks the strict, logical structure AIs prefer.
 
-* **Command Line AI Code assistance tools** like **Gemini CLI** do not have access to any AST based information. They completely rely on analysing the code "ad-hoc" resulting in hight token consumption.<br>
-LogiDoclet will provide them at least to the **full API documentation of a project**, therefore reducing the need for direct code analysis substantially.
+LogiDoclet addresses these issues by providing a **compact, unambiguous set of Prolog facts** that represent the codebase's API. This makes the documentation **instantly machine-readable**.
 
+---
+
+## Key Usage Scenarios & Advantages
+
+LogiDoclet provides crucial context that standard code assistance tools often miss:
+
+1.  **Closing the Library Context Gap (External Dependencies):**
+    * Integrated Development Environments (IDEs) build a robust internal Abstract Syntax Tree (AST) for the code you are currently writing.
+    * However, the AST often lacks the deep design context of **external libraries and frameworks** (e.g., Spring, Apache) that you haven't fully used or imported yet—a common scenario during major design or refactoring.
+    * **Solution:** We encourage **industry-leading software foundations and platform providers** (such as Google, Spring, and Apache) to publish this AI-friendly documentation alongside their binaries to enable deeper LLM context for any library on your classpath.
+
+2.  **Empowering Command Line AI Tools:**
+    * Command Line Interface (CLI) tools, like **Gemini CLI**, operate outside the IDE's environment and cannot access the project's internal AST. They rely on expensive, ad-hoc analysis of raw source files.
+    * **Solution:** By providing the structured API facts via LogiDoclet, CLI tools gain immediate access to the entire project's API structure, substantially reducing the need for costly direct source code analysis.
 ___
 
 ## User Guide
@@ -45,7 +55,7 @@ To use LogiDoclet, you invoke the standard `javadoc` tool and specify `LogiDocle
 #### Options
 *   `-d <directory>`: **(Required)** Specifies the output directory. **It is highly recommended to use a directory outside of `target/`** (e.g., `build/prolog-docs`) to prevent generated files from being deleted by `mvn clean`.
 *   `-docletpath <path_to_jar>`: **(Required)** Specifies the path to the LogiDoclet JAR file. You must build the project first (`mvn clean install`) to create this JAR in the `target/` directory.
-*   `-outputCommentary`: (Optional) Includes Javadoc comments in the Prolog output. If omitted, a "minimal" version without comments is generated.
+*   `-outputMode`: (Optional) Defines if the "full" version, that includes Javadoc comments in the Prolog output,  a "minimal" version without comments, or "both" (default) is generated.
 *   All other standard `javadoc` options like `--source-path` and `-subpackages` are supported.
 
 #### Example Commands
@@ -122,8 +132,6 @@ Key configuration snippet from the example which shows how generate standard jav
                 <goal>javadoc</goal>
             </goals>
             <configuration>
-                <classifier>logidoclet-javadoc</classifier>
-                <!-- uncomment next two lines for troubleshooting -->
                 <!-- The next is necessary because otherwise LogiDoclet will respective parameter -->
                 <disableNoFonts>true</disableNoFonts>
                 <doclet>io.github.grimch.doclet.LogiDoclet</doclet>
@@ -136,9 +144,6 @@ Key configuration snippet from the example which shows how generate standard jav
                 <additionalOptions>
                     <!-- Pass the output directory to your custom doclet -->
                     <additionalOption>-d ${logidoc.output.directory}</additionalOption>
-                    <!-- Pass the outputCommentary flag -->
-                    <!-- Comment out the line below to enable full output -->
-                    <additionalOption>-outputCommentary</additionalOption>
                     <!-- Pass the prettyPrint flag -->
                     <!-- Comment out the line below to enable full output -->
                     <!-- Note: tokenization is more efficient wit this disabled -->
@@ -200,11 +205,6 @@ tasks.register('logidocletJavadoc', Javadoc) {
     options.doclet = 'io.github.grimch.doclet.LogiDoclet'
     options.docletpath = configurations.logidoclet.files.asType(List)
 
-    // Pass the output directory to your custom doclet
-    // options.addStringOption('-d', logidocOutputDirectory.get().asFile.absolutePath)
-    // Pass the outputCommentary flag
-    // Comment out the line below to enable full output
-    options.addStringOption('outputCommentary', 'true')
     // Pass the prettyPrint flag
     // Comment out the line below to enable full output
     // Note: tokenization is more efficient with this disabled
@@ -243,7 +243,7 @@ To make it easy to experiment, a complete, runnable Maven example is provided in
      ```bash
       gradle clean defaultJavadoc logidocletJavadoc
      ```  
-In both cases the Prolog documentation will be generated in the `examples/logidoclet-usage/llm-context/apidocs` directory. Output will be full output (inlcuding comments) and formatted.
+In both cases the Prolog documentation will be generated in the `examples/logidoclet-usage/llm-context/apidocs` directory. Output will be both minimal and full output (inlcuding comments) and formatted.
 
 Also for both cases standard Javadoc output will be generated as well is respective default output folders for comparison purposes.
 
