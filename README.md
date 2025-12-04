@@ -16,7 +16,24 @@
 LogiDoclet is a **Javadoc Doclet** that generates a structured, LLM-friendly representation of your Java codebase. Its purpose is to make software projects instantly accessible and highly token-efficient for AI analysis.
 
 ---
+# Table of Contents
+- [Motivation: Why Traditional Javadoc Fails AI](#motivation-why-traditional-javadoc-fails-ai)
+- [Key Usage Scenarios](#key-usage-scenarios)
+- [User Guide](#user-guide)
+  - [Direct `javadoc` Execution](#direct-javadoc-execution)
+  - [Usage with Maven](#usage-with-maven)
+  - [Usage with Gradle](#usage-with-gradle)
+- [Formatted Prolog Output Example](#formatted-prolog-output-example)
+- [Standalone Example Project](#standalone-example-project)
+- [Developer Guide](#developer-guide)
+  - [Architecture Overview](#architecture-overview)
+  - [Project Structure](#project-structure)
+  - [Building and Testing](#building-and-testing)
+- [License](#license)
 
+___
+
+<!-- TOC --><a name="motivation-why-traditional-javadoc-fails-ai"></a>
 ## Motivation: Why Traditional Javadoc Fails AI
 
 While human developers rely on traditional Javadoc for API descriptions, this presentation-oriented format is highly inefficient for Large Language Models (LLMs):
@@ -28,7 +45,8 @@ LogiDoclet addresses these issues by providing a **compact, unambiguous set of P
 
 ---
 
-## Key Usage Scenarios & Advantages
+<!-- TOC --><a name="key-usage-scenarios"></a>
+## Key Usage Scenarios
 
 LogiDoclet provides crucial context that standard code assistance tools often miss:
 
@@ -42,13 +60,15 @@ LogiDoclet provides crucial context that standard code assistance tools often mi
     * **Solution:** By providing the structured API facts via LogiDoclet, CLI tools gain immediate access to the entire project's API structure, substantially reducing the need for costly direct source code analysis.
 ___
 
+<!-- TOC --><a name="user-guide"></a>
 ## User Guide
 
 There are two primary ways to use LogiDoclet:
 * Directly via the `javadoc` command-line tool
 * As a plugin in a Gradle / Maven build.
 
-### 1. Direct javadoc Execution
+<!-- TOC --><a name="direct-javadoc-execution"></a>
+### Direct `javadoc` Execution
 
 To use LogiDoclet, you invoke the standard `javadoc` tool and specify `LogiDoclet` as the doclet. This method is useful for quick analysis or for use in non-Maven projects.
 
@@ -84,7 +104,8 @@ javadoc -doclet io.github.grimch.doclet.LogiDoclet \
         -subpackages io.github.grimch.doclet.sample_module
 ```
 
-### 2. Usage with Maven
+<!-- TOC --><a name="usage-with-maven"></a>
+### Usage with Maven
 
 You can integrate LogiDoclet directly into your project's `pom.xml` using the `maven-javadoc-plugin`.
 
@@ -156,7 +177,8 @@ Key configuration snippet from the example which shows how generate standard jav
 
 ```
 
-### 3. Usage with Gradle
+<!-- TOC --><a name="usage-with-gradle"></a>
+### Usage with Gradle
 
 You can integrate LogiDoclet directly into your project's `build.gradle` by registering  `logidocletJavadoc` task.
 
@@ -211,11 +233,19 @@ tasks.register('logidocletJavadoc', Javadoc) {
     options.addStringOption('prettyPrint', 'true')
 }
 ```
+___
 
+<!-- TOC --><a name="formatted-prolog-output-example"></a>
+## Formatted Prolog Output Example
 
+To illustrate the output of LogiDoclet, you can examine the Java classes used for unit testing and their corresponding expected formatted Prolog representation. The `-prettyPrint` option was used to generate this output.
 
+*   **Sample Java Source Files:** [`src/test/resources/sample_module`](./src/test/resources/sample_module)
+*   **Expected Formatted Prolog Output Files:** [`src/test/resources/expected_output/full`](./src/test/resources/expected_output/full)
+___
 
-#### Standalone Example Project
+<!-- TOC --><a name="standalone-example-project"></a>
+## Standalone Example Project
 To make it easy to experiment, a complete, runnable Maven example is provided in the [`examples/logidoclet-usage/`](./examples/logidoclet-usage/) directory.
 
 **To run the example:**
@@ -247,7 +277,7 @@ In both cases the Prolog documentation will be generated in the `examples/logido
 
 Also for both cases standard Javadoc output will be generated as well is respective default output folders for comparison purposes.
 
-### Additional Output Files for AI Tool Integration
+**Additional Output Files for AI Tool Integration**
 
 LogiDoclet generates three files in the specified output directory (`-d` option), which are crucial for AI agent integration:
 
@@ -255,37 +285,16 @@ LogiDoclet generates three files in the specified output directory (`-d` option)
 *   **[`java_metastructure.pl`](src/main/resources/java_metastructure.pl)**: This file defines the Prolog schema (predicates and their arities) used to represent the Java codebase. It's essential for any Prolog-based AI agent to correctly interpret the generated facts.
 *   **[`templates/master_LLM_context.md.template`](src/main/resources/master_LLM_context_template.md)**: This file serves as a structured template for initializing AI tools like Claude Code and Gemini CLI. It is designed to be copied directly into your project's root directory (or a designated context directory for your AI tool) under a suitable name (e.g., `gemini.md` or `claude.md`). The AI tool is then expected to interpret this file, which contains references to `LLM_context.md` and the generated Prolog facts, to establish its initial context about the codebase.
 
-### Formatted Prolog Output Example
-
-To illustrate the output of LogiDoclet, you can examine the Java classes used for unit testing and their corresponding expected formatted Prolog representation. The `-prettyPrint` option was used to generate this output.
-
-*   **Sample Java Source Files:** [`src/test/resources/sample_module`](./src/test/resources/sample_module)
-*   **Expected Formatted Prolog Output Files:** [`src/test/resources/expected_output/full`](./src/test/resources/expected_output/full)
-
 ---
+
+<!-- TOC --><a name="developer-guide"></a>
 ## Developer Guide
 
 This guide provides information for developers who want to contribute to LogiDoclet itself.
 
-### Prerequisites
-*   Java Development Kit (JDK) 17 or later.
-*   Apache Maven 3.6.0 or later.
+<!-- TOC --><a name="architecture-overview"></a>
+### Architecture Overview
 
-### Building and Testing
-LogiDoclet can be built with either Maven or Gradle. To build the project, run the tests, and install it in your local repository, 
-execute either :
-```bash
-mvn clean install
-```
-or
-```bash
-gradle clean publishToMavenLocal
-```
-This build will also run the integration test in `LogiDocletTest`, which generates Prolog facts for a sample project and compares them against an expected output.
-
-### Core Concepts
-
-#### Architecture Overview
 LogiDoclet hooks into the `javadoc` toolchain. The tool parses the Java source and provides an Abstract Syntax Tree (AST) to our doclet, which then transforms the AST nodes into Prolog facts.
 
 ```mermaid
@@ -306,8 +315,8 @@ graph TD
         F --> G["Prolog Files (*.pl)"];
     end
 ```
-
-#### Project Structure
+<!-- TOC --><a name="project-structure"></a>
+### Project Structure
 ```
 .
 ├── pom.xml                 # Maven build configuration
@@ -331,14 +340,31 @@ graph TD
             ├── sample_module           # A sample Java project for testing
             └── expected_output         # The expected Prolog output for the sample
 ```
+* **`LogiDoclet`**: The main class implementing `jdk.javadoc.doclet.Doclet`. It handles options and orchestrates the process.
+* **`PrologVisitor`**: A `SimpleElementVisitor9` that does the core work. It traverses the AST elements (modules, packages, types, methods) provided by the Doclet API.
+* **Prolog Data Model (`Term`, `Fact`, `Atom`, `PrologList`)**: A set of classes that represent Prolog constructs. The `PrologVisitor` builds a tree of these objects, which can then be serialized into valid Prolog syntax via their `toString()` methods.
+* **`DocletPrologWriter`**: Manages the creation of the output directory structure and writes the generated Prolog facts into `.pl` files.
 
-#### Key Components
-1.  **`LogiDoclet`**: The main class implementing `jdk.javadoc.doclet.Doclet`. It handles options and orchestrates the process.
-2.  **`PrologVisitor`**: A `SimpleElementVisitor9` that does the core work. It traverses the AST elements (modules, packages, types, methods) provided by the Doclet API.
-3.  **Prolog Data Model (`Term`, `Fact`, `Atom`, `PrologList`)**: A set of classes that represent Prolog constructs. The `PrologVisitor` builds a tree of these objects, which can then be serialized into valid Prolog syntax via their `toString()` methods.
-4.  **`DocletPrologWriter`**: Manages the creation of the output directory structure and writes the generated Prolog facts into `.pl` files.
+<!-- TOC --><a name="building-and-testing"></a>
+### Building and Testing
+
+**Prerequisites**
+*   Java Development Kit (JDK) 17 or later.
+*   Apache Maven 3.6.0 or later.
+
+LogiDoclet can be built with either Maven or Gradle. To build the project, run the tests, and install it in your local repository, 
+execute either :
+```bash
+mvn clean install
+```
+or
+```bash
+gradle clean publishToMavenLocal
+```
+This build will also run the integration test in `LogiDocletTest`, which generates Prolog facts for a sample project and compares them against an expected output.
+
 
 ---
-
+<!-- TOC --><a name="license"></a>
 ## License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
