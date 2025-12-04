@@ -1,35 +1,52 @@
 # Project Knowledge Base & Navigation
 
-> **Note to Developer:** Append this content to your project's root-level AI instructions (e.g., `GEMINI.md`, `CLAUDE.md`, `.cursorrules`). Ensure the path `llm-context/apidocs/` matches your generation output.
+> **Note to Developer:** Append this content to your project's root-level AI instructions. Ensure the path `llm-context/apidocs/` matches your generation output.
 
-## 🧠 Information Retrieval Strategy
+## ⚡ Core Protocol: Javadoc-First Development
 
-To understand this codebase efficiently and prevent hallucination, you must follow this strict hierarchy of information sources.
+To ensure high-quality code generation and minimize token consumption, you must adhere to the **LogiDoclet Protocol**.
 
-**Step 0: Initialization**
-Before answering queries about the code, read **`llm-context/apidocs/LLM_context.md`**. This file contains the mandatory algorithmic logic for parsing the project's Prolog-based documentation.
+**Mandatory Initialization:**
+Before undertaking **ANY** code-altering, code-designing, or dependency-mapping task — including, but not limited to, **designing new components** (e.g., a Controller tier), **overhauling existing architecture** (refactoring) — you **MUST** read and apply the instructions found in:
+👉 **`llm-context/apidocs/LLM_context.md`**
 
-**Step 1: The Retrieval Loop**
-Follow this decision tree to retrieve information with maximum token efficiency:
+**The Golden Rule:**
+Treat the Prolog-based Javadoc defined in that context file as the **Primary Source of Truth and Design Specification**. You are strictly forbidden from analyzing raw `.java` source files unless the Prolog documentation explicitly fails to provide the necessary method signatures or structural relationships required for the intended design or implementation.
+
+---
+
+### 🗺️ LLM Execution Mandate Flowchart
+
+This diagram represents the **non-negotiable order** of operations for processing any code request.
 
 ```mermaid
-graph TD
-    Start([User Query]) --> Init[Load Parsing Logic<br>llm-context/apidocs/LLM_context.md]
-    Init --> Check{Info Needed?}
-    Check -- Yes --> Min[<b>Priority 1: Minimal Docs</b><br>llm-context/apidocs/minimal]
-    Min --> Suff{Sufficient?}
-    Suff -- Yes --> Answer([Answer User])
-    Suff -- No --> Full[<b>Priority 2: Full Docs + Javadoc</b><br>llm-context/apidocs/full]
-    Full --> Suff2{Sufficient?}
-    Suff2 -- Yes --> Answer
-    Suff2 -- No --> Source[<b>Priority 3: Raw Source Code</b><br>Read actual .java files]
-    Source --> Answer
-    Check -- No --> Answer
-```
-## ⚡ Core Protocol
+flowchart TD
+A[User Request: Design, Refactor, or Code Task] --> B{Task Involves Project Code?}
 
-1.  **Source of Truth:** The Prolog facts in `llm-context/apidocs/` represent the authoritative structure of the project.
-2.  **Token Conservation:**
-    * **Always** attempt to resolve queries using the **Minimal** Prolog facts first.
-    * **Only** load the **Full** docs if you need natural language context (Javadoc) or deep intent analysis.
-    * **Last Resort:** Do not read raw source code files unless the Prolog documentation is missing the specific implementation detail required (e.g., inside a method body).
+    B -- No --> End[Answer Request Directly]
+    
+    B -- Yes --> C[MANDATORY: Load `LLM_context.md` Protocol]
+    C --> D(Execute Retrieval Strategy: Minimal Facts)
+    
+    D --> E{Prolog Facts Sufficient<br/> for Design/Signatures?}
+    
+    E -- Yes --> F[Generate Code / Design Solution]
+    E -- No --> G(Execute Retrieval Strategy: Full Facts/Javadoc)
+    
+    G --> H{Javadoc Context Sufficient<br/> for Implementation?}
+    
+    H -- Yes --> F
+    
+    H -- No --> I[LAST RESORT: Read Raw .java Source Files]
+    I --> F
+    
+    F --> End
+    
+    style A fill:#a9c2f6,stroke:#0d47a1,stroke-width:2px
+    style C fill:#fff2cc,stroke:#ff6f00,stroke-width:3px
+    style D fill:#d9ead3,stroke:#38761d
+    style G fill:#d9ead3,stroke:#38761d
+    style I fill:#f4cccc,stroke:#cc0000,stroke-width:3px
+    style F fill:#b6d7a8,stroke:#6aa84f
+    style End fill:#c9daf8
+```

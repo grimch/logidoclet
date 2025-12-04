@@ -165,7 +165,7 @@ public class LogiDoclet implements Doclet {
 
                     @Override
                     public String getParameters() {
-                        return "<boolean>"; // No parameters
+                        return "<minimal>|<full>"; // No parameters
                     }
 
                     @Override
