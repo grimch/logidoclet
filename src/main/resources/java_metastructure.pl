@@ -1,35 +1,52 @@
-% META-DOCUMENTATION
-%
-% This file contains the executable schema for the project's Prolog facts.
-% All information is provided as queryable facts and rules.
-%
-% BOOTSTRAP RULE: is_entry_point/1
-%
-% --- Start of Schema ---
+% 1. Project Fact Definition
 
-predicate_info(package_index, arity(1)).
-argument_info(package_index, 1, modules, type(list(package_name))).
+predicate_info(project, arity(3)).
+argument_info(project, 1, project_name, type(project_fqn)).
+argument_info(project, 2, version, type(project_version)).
+argument_info(project, 3, structure, type(structure_type)).
+
+predicate_info(project_structure, arity(1)).
+argument_info(project_structure, 1, type, type(structure_type)).
+
+% Explicitly define the allowed structure types (Enumeration)
+predicate_info(structure_type, arity(1)).
+argument_info(structure_type, 1, name, type(atom)).
+
+structure_type("module_structured").   % Standard module structure
+structure_type("package_structured").  % Standard package structure
+
+% 2. Module Fact Definition
+
+predicate_info(module_list, arity(3)).
+argument_info(module_list, 1, project_name, type(project_fqn)).
+argument_info(module_list, 2, version, type(project_version)).
+argument_info(module_list, 3, module_index, type(module_index)).
 
 predicate_info(module_index, arity(1)).
-argument_info(module_index, 1, modules, type(list(module_name))).
+argument_info(module_index, 1, modules, type(list(module_fqn))).
+
+predicate_info(module_details, arity(3)).
+argument_info(module_details, 1, name, type(module_fqn)).
+argument_info(module_details, 2, version, type(project_version)).
+argument_info(module_details, 3, module, type(module)).
 
 predicate_info(module, arity(7)).
 argument_info(module, 1, name, type(module_name)).
-argument_info(module, 2, modifiers, type(list(modifier))). % e.g., 'open'
+argument_info(module, 2, modifiers, type(list(modifier))).
 argument_info(module, 3, requires, type(list(requires))).
 argument_info(module, 4, exports, type(list(exports))).
-argument_info(module, 5, uses, type(list(type))). % Services consumed
-argument_info(module, 6, provides, type(list(provides))). % Services offered
+argument_info(module, 5, uses, type(list(type))).
+argument_info(module, 6, provides, type(list(provides))).
 argument_info(module, 7, all_packages, type(list(package_name))).
 
 predicate_info(requires, arity(3)).
-argument_info(requires, 1, modifiers, type(list(modifier))). % e.g., 'transitive', 'static'
+argument_info(requires, 1, modifiers, type(list(modifier))).
 argument_info(requires, 2, module_name, type(module_name)).
 argument_info(requires, 3, annotations, type(list(annotation))).
 
 predicate_info(exports, arity(3)).
-argument_info(exports, 1, package_name, type(package_name)).
-argument_info(exports, 2, to_modules, type(list(module_name))). % Target modules, or '_' if public
+argument_info(exports, 1, package_name, type(package_fqn)).
+argument_info(exports, 2, to_modules, type(list(module_name))).
 argument_info(exports, 3, annotations, type(list(annotation))).
 
 predicate_info(provides, arity(3)).
@@ -37,17 +54,54 @@ argument_info(provides, 1, service_type, type(type)).
 argument_info(provides, 2, with_implementations, type(list(type))).
 argument_info(provides, 3, annotations, type(list(annotation))).
 
+% 3. Package Fact Definition
+
+predicate_info(package_list, arity(3)).
+argument_info(package_list, 1, project_name, type(project_fqn)).
+argument_info(package_list, 2, version, type(project_version)).
+argument_info(package_list, 3, package_index, type(package_index)).
+
+predicate_info(package_index, arity(1)).
+argument_info(package_index, 1, package_names, type(list(package_name))).
+
+predicate_info(package_details, arity(3)).
+argument_info(package_details, 1, package_name, type(package_fqn)).
+argument_info(package_details, 2, version, type(project_version)).
+argument_info(package_details, 3, package_declaration, type(package_declaration))
+
 predicate_info(package_declaration, arity(2)).
-argument_info(package_declaration, 1, package_name, type(package_name)).
+argument_info(package_declaration, 1, package_name, type(package_fqn)).
 argument_info(package_declaration, 2, declared_types, type(list(type_declaration))).
 
 predicate_info(type_declaration, arity(2)).
 argument_info(type_declaration, 1, name, type(simple_name)).
 argument_info(type_declaration, 2, category, type(type_category)).
 
+predicate_info(type_category, arity(1)).
+argument_info(type_category, 1, name, type(atom)).
+
+% Defines the possible categories for a type declaration.
+type_category('CLASS').
+type_category('INTERFACE').
+type_category('ENUM').
+type_category('RECORD').
+type_category('ANNOTATION').
+
+% 4. Type_Details Fact Definition
+
+% Explicitly defined the second argument as a union of detailed structures
+predicate_info(type_details, arity(3)).
+argument_info(type_details, 1, type_fqn, type(type_fqn)).
+argument_info(type_details, 2, version, type(project_version)).
+argument_info(type_details, 3, type_definition, type(type_definition_term)).
+
+% Helper to explain the polymorphism of type_definition_term to the LLM
+predicate_info(type_definition_term, arity(1)).
+argument_info(type_definition_term, 1, term_structure, type(one_of([class, interface, record, enum, annotation_type]))).
+
 predicate_info(class, arity(10)).
 argument_info(class, 1, name, type(simple_name)).
-argument_info(class, 2, package_name, type(package_name)).
+argument_info(class, 2, package_name, type(package_fqn)).
 argument_info(class, 3, modifiers, type(list(modifier))).
 argument_info(class, 4, type_parameters, type(list(type_parameter))).
 argument_info(class, 5, extends, type(extends)).
@@ -59,7 +113,7 @@ argument_info(class, 10, doc_comment, type(string)).
 
 predicate_info(interface, arity(9)).
 argument_info(interface, 1, name, type(simple_name)).
-argument_info(interface, 2, package_name, type(package_name)).
+argument_info(interface, 2, package_name, type(package_fqn)).
 argument_info(interface, 3, modifiers, type(list(modifier))).
 argument_info(interface, 4, type_parameters, type(list(type_parameter))).
 argument_info(interface, 5, extends, type(list(extends))).
@@ -70,7 +124,7 @@ argument_info(interface, 9, doc_comment, type(string)).
 
 predicate_info(record, arity(9)).
 argument_info(record, 1, name, type(simple_name)).
-argument_info(record, 2, package_name, type(package_name)).
+argument_info(record, 2, package_name, type(package_fqn)).
 argument_info(record, 3, modifiers, type(list(modifier))).
 argument_info(record, 4, type_parameters, type(list(type_parameter))).
 argument_info(record, 5, implements, type(list(implements))).
@@ -81,7 +135,7 @@ argument_info(record, 9, doc_comment, type(string)).
 
 predicate_info(enum, arity(8)).
 argument_info(enum, 1, name, type(simple_name)).
-argument_info(enum, 2, package_name, type(package_name)).
+argument_info(enum, 2, package_name, type(package_fqn)).
 argument_info(enum, 3, modifiers, type(list(modifier))).
 argument_info(enum, 4, implements, type(list(implements))).
 argument_info(enum, 5, constants, type(list(enum_constant))).
@@ -96,14 +150,14 @@ argument_info(enum_constant, 3, constructor_arguments, type(list(term))).
 
 predicate_info(annotation_type, arity(6)).
 argument_info(annotation_type, 1, name, type(simple_name)).
-argument_info(annotation_type, 2, package_name, type(package_name)).
+argument_info(annotation_type, 2, package_name, type(package_fqn)).
 argument_info(annotation_type, 3, modifiers, type(list(modifier))).
 argument_info(annotation_type, 4, members, type(list(annotation_member))).
 argument_info(annotation_type, 5, annotations, type(list(annotation))).
 argument_info(annotation_type, 6, doc_comment, type(string)).
 
 predicate_info(member, arity(1)).
-argument_info(member, 1, member_fact, type(term)).
+argument_info(member, 1, member_fact, type(term)). % Can be method(), constructor(), field()
 
 predicate_info(method, arity(8)).
 argument_info(method, 1, name, type(simple_name)).
@@ -184,6 +238,10 @@ argument_info(implements, 2, target_type, type(type)).
 predicate_info(throws, arity(1)).
 argument_info(throws, 1, exception_type, type(type)).
 
+% Leaf types
+predicate_info(project_version, arity(1)).
+argument_info(project_version, 1, name, type(atom)).
+
 predicate_info(module_name, arity(1)).
 argument_info(module_name, 1, name, type(atom)).
 
@@ -196,6 +254,24 @@ argument_info(simple_name, 1, name, type(atom)).
 predicate_info(qualified_name, arity(1)).
 argument_info(qualified_name, 1, name, type(atom)).
 
+predicate_info(project_fqn, arity(1)).
+argument_info(project_fqn, 1, name, type(atom)).
+
+predicate_info(module_fqn, arity(1)).
+argument_info(module_fqn, 1, name, type(atom)).
+
+predicate_info(package_fqn, arity(1)).
+argument_info(package_fqn, 1, name, type(atom)).
+
+predicate_info(type_fqn, arity(1)).
+argument_info(type_fqn, 1, name, type(atom)).
+
+predicate_info(fqn, arity(1)).
+argument_info(fqn, 1, name, type(atom)).
+
+predicate_info(term, arity(1)).
+argument_info(term, 1, generic_term, type(any)).
+
 predicate_info(type_category, arity(1)).
 argument_info(type_category, 1, name, type(atom)).
 
@@ -205,14 +281,7 @@ argument_info(type_kind_atom, 1, name, type(atom)).
 predicate_info(modifier_keyword, arity(1)).
 argument_info(modifier_keyword, 1, name, type(atom)).
 
-% --- BEGIN AI-GENERATED PREDICATE DEFINITIONS ---
-
-% Defines the possible categories for a type declaration.
-type_category('CLASS').
-type_category('INTERFACE').
-type_category('ENUM').
-type_category('RECORD').
-type_category('ANNOTATION').
+% 5. Potential values definition
 
 % Defines the possible keywords for a modifier.
 modifier_keyword(public).
@@ -250,26 +319,22 @@ primitive_type(float).
 primitive_type(double).
 primitive_type(void).
 
-% --- END AI-GENERATED PREDICATE DEFINITIONS ---
+% 6. Error handling definition
+predicate_info(false_reason, arity(3)).
+argument_info(false_reason, 1, name, type(type_fqn)).
+argument_info(project, 2, version, type(project_version)).
+argument_info(false_reason, 3, false_reason_detail, type(false_reason_detail)).
 
-% --- EXECUTABLE SCHEMA RULES ---
+predicate_info(false_reason_detail, arity(3)).
+argument_info(false_reason_detail, 1, false_reason_category, type(false_reason_category)).
+argument_info(false_reason_detail, 2, matched_fqn_part, type(fqn)). % Matched segment, e.g., 'com.google'
+argument_info(false_reason_detail, 3, unmatched_fqn_part, type(fqn)). % Unmatched segment, e.g., 'genai.Class'
 
-% Defines the valid entry-point predicates for project discovery.
-is_entry_point(module_index).
-is_entry_point(package_index).
+predicate_info(false_reason_category, arity(1)).
+argument_info(false_reason_category, 1, name, type(atom)).
 
-% Retrieves the type specifier for a given argument of a predicate.
-% Example: argument_type(class, 1, Type). -> Type = simple_name.
-argument_type(PredicateName, ArgIndex, TypeSpecifier) :-
-    argument_info(PredicateName, ArgIndex, _, type(TypeSpecifier)).
-
-% Succeeds if a given TypeName and Category form a valid type declaration
-% according to the master schema. It checks if the Category is a known one.
-is_valid_type_declaration(_TypeName, Category) :-
-    type_category(Category),
-    true.
-
-% Succeeds if a given ModifierKeyword is a valid modifier
-% according to the master schema.
-is_valid_modifier(ModifierKeyword) :-
-    modifier_keyword(ModifierKeyword).
+% Defines the level at which the information for the given FQN is missing
+false_reason_category('project_unavailable').
+false_reason_category('version_unavailable').
+false_reason_category('wrong_path').
+false_reason_category('wrong_element').
