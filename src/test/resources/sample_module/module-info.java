@@ -27,6 +27,6 @@
 module io.github.grimch.doclet.sample_module {
     exports  io.github.grimch.doclet.sample_module.types.basic;
     exports  io.github.grimch.doclet.sample_module.types.advanced;
-    exports  io.github.grimch.doclet.sample_module.types.utility;
+    exports  io.github.grimch.doclet.sample_module.types.utility to another_module;
     requires java.sql;
 }

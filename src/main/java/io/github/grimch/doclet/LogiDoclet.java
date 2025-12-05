@@ -339,10 +339,8 @@ public class LogiDoclet implements Doclet {
             for (DocletProcessor docletProcessor : docletProcessors) {
                 if (docletProcessor.visitor().hasModulesDefined()) {
                     docletProcessor.writer().writeIndexFile(docletProcessor.visitor().getModuleIndex(), "module_index");
-                } else {
-                    docletProcessor.writer().writeIndexFile(docletProcessor.visitor().getPackageIndex(), "package_index");
                 }
-
+                docletProcessor.writer().writeIndexFile(docletProcessor.visitor().getPackageIndex(), "package_index");
             }
             reporter.print(Diagnostic.Kind.NOTE, "Prolog fact generation completed successfully.");
             return true;

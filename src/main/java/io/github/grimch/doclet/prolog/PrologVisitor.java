@@ -62,6 +62,7 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
     private final boolean outputCommentary;
     private final List<Term> indexModuleList = new ArrayList<>();
     private final List<Term> indexPackageList = new ArrayList<>();
+    private final Set<String> internalPackageNames = new HashSet<>();
     private List<Fact> packageMembers = null;
     private List<Fact> typeMembers = null;
     private final Types typeUtils;
@@ -133,9 +134,6 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
         );
         writer.writeModuleSummaryFile(moduleName, moduleFact);
         indexModuleList.add(moduleNameAtom);
-
-        // Visit enclosed packages
-        e.getEnclosedElements().forEach(element -> element.accept(this, p));
         return null;
     }
 
@@ -162,7 +160,9 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
                 new PrologList(new ArrayList<>(packageMembers))
         );
         writer.writePackageSummaryFile(packageName, packageFact);
-        indexPackageList.add(packageNameAtom);
+        if (! internalPackageNames.contains(packageName)) {
+            indexPackageList.add(packageNameAtom);
+        }
         return null;
     }
 
@@ -391,11 +391,15 @@ public class PrologVisitor extends SimpleElementVisitor9<Void, Void> {
      * Converts a {@link ModuleElement.ExportsDirective} to a Prolog {@code exports} fact.
      */
     private Term toPrologExports(ModuleElement.ExportsDirective e) {
+        String packageName = e.getPackage().getQualifiedName().toString();
         List<Term> toModules =
             Optional.ofNullable(e.getTargetModules())
                 .orElse(Collections.emptyList())
                 .stream()
-                .map(m -> new Atom(m.getQualifiedName().toString()))
+                .map(m -> {
+                    internalPackageNames.add(packageName);
+                    return new Atom(m.getQualifiedName().toString());
+                })
                 .collect(Collectors.toList());
 
         return new Fact("exports",
