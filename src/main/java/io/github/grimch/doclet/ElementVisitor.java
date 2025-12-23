@@ -48,16 +48,15 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
     private final DocTrees treeUtils;
     private final Reporter reporter;
 
-    private final List<Term> indexModuleList = new ArrayList<>();
-    private final List<Term> indexPackageList = new ArrayList<>();
+    private final List<String> packageList = new ArrayList<>();
     private final Set<String> internalPackageNames = new HashSet<>();
 
 
-    public ElementVisitor(DocWriter docWriter, DocletEnvironment docEnv, Reporter reporter) {
-        this.docWriter = docWriter;
+    public ElementVisitor(DocletEnvironment docEnv, Reporter reporter,DocWriter docWriter) {
         this.docEnv = docEnv;
         this.treeUtils = docEnv.getDocTrees();
         this.reporter = reporter;
+        this.docWriter = docWriter;
     }
 
     public static <T extends Collection<?>> T nullIfEmpty(T collection) {
@@ -168,6 +167,15 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
 
     }
 
+    public void startVisit() {
+        docEnv
+            .getIncludedElements()
+            .stream()
+            .forEach(element -> element.accept(this, null));
+
+        docWriter.writePackageListDoc(new PackageListDoc(packageList));
+    }
+
     @Override
     public Void visitModule(ModuleElement moduleElement, Void p) {
         moduleElement
@@ -195,6 +203,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                     groupedElementKinds.get(RECORD)
                 )
             );
+            packageList.add(packageName);
         }
         return null;
 

@@ -67,34 +67,6 @@ public class LogiDocletTest {
     }
 
     /**
-     * Executes the {@link LogiDoclet} on a sample project and verifies its output.
-     * <p>
-     * The test performs the following steps:
-     * <ol>
-     *     <li>Invokes the system's {@link DocumentationTool} (javadoc) with the {@code LogiDoclet}.</li>
-     *     <li>Specifies the source path to a sample module and the packages to process.</li>
-     *     <li>Asserts that the javadoc tool execution completes successfully (exit code 0).</li>
-     *     <li>Recursively walks the directory of expected Prolog files and compares each file
-     *         line-by-line with its corresponding actual generated file.</li>
-     *     <li>Asserts that the contents of the actual and expected files are identical.</li>
-     * </ol>
-     *
-     * @throws IOException if an error occurs during file I/O operations (e.g., reading or deleting files).
-     */
-    @Test
-    public void testMinimalOutput() throws IOException {
-        String[] args = {
-                "-verbose",
-                "-doclet", LogiDoclet.class.getName(),
-                "-d", outputDir.toString(),
-                "-outputMode", "minimal",
-                "--source-path", "src/test/resources/sample_module",
-                "-subpackages",  "io.github.grimch.doclet.sample_module"
-        };
-        testDoclet(args, "minimal");
-    }
-
-    /**
      * Executes the {@link LogiDoclet} on a sample java class to get formatted output and verifies the same.
      * <p>
      * The test performs the following steps:
@@ -114,7 +86,6 @@ public class LogiDocletTest {
                 "-verbose",
                 "-doclet", LogiDoclet.class.getName(),
                 "-d", outputDir.toString(),
-                "-outputMode", "full",
                 "-prettyPrint", "true",
                 "-sourcepath", "src/test/resources/sample_module",
                 "-subpackages",  "io.github.grimch.doclet.sample_module"
