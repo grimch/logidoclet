@@ -1,0 +1,160 @@
+{
+  "name": "C1",
+  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
+  "modifiers": [
+    "public",
+    "non-sealed"
+  ],
+  "extendsType": "java.lang.Object",
+  "implementsTypes": [
+    "io.github.grimch.doclet.sample_module.types.basic.I1<java.lang.Integer, java.lang.String>",
+    "java.io.Serializable"
+  ],
+  "classes": [
+    "C1.StaticNestedC1",
+    "C1.InnerC2"
+  ],
+  "fields": [
+    {
+      "name": "PUBLIC_STATIC_FINAL_STRING",
+      "modifiers": [
+        "public",
+        "static",
+        "final"
+      ],
+      "type": "java.lang.String"
+    },
+    {
+      "name": "publicInt",
+      "modifiers": [
+        "public"
+      ],
+      "type": "int"
+    },
+    {
+      "name": "protectedVolatileDouble",
+      "modifiers": [
+        "protected",
+        "volatile"
+      ],
+      "type": "double"
+    },
+    {
+      "name": "publicStringArray",
+      "modifiers": [
+        "public"
+      ],
+      "type": "java.lang.String[]"
+    },
+    {
+      "name": "publicGenericList",
+      "modifiers": [
+        "public"
+      ],
+      "type": "java.util.List<java.lang.Integer>",
+      "annotations": [
+        "@io.github.grimch.doclet.sample_module.types.basic.TestAnno"
+      ]
+    },
+    {
+      "name": "protectedWildcardMap",
+      "modifiers": [
+        "protected"
+      ],
+      "type": "java.util.Map<? extends java.lang.Number, ? super java.lang.String>"
+    }
+  ],
+  "constructors": [
+    {
+      "name": "<init>",
+      "modifiers": [
+        "public"
+      ],
+      "isVarArgs": false,
+      "documentation": "Public canonical constructor for C1.\n Initializes default values for fields."
+    },
+    {
+      "name": "<init>",
+      "modifiers": [
+        "protected"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "type": "int"
+        }
+      ],
+      "isVarArgs": false,
+      "documentation": "Overloaded protected constructor for C1.\n@param id An integer identifier to initialize {@link #publicInt}."
+    }
+  ],
+  "methods": [
+    {
+      "name": "m1",
+      "modifiers": [
+        "public"
+      ],
+      "returnType": "void",
+      "parameters": [
+        {
+          "name": "arg1",
+          "type": "java.lang.Integer"
+        }
+      ],
+      "isDefault": false,
+      "isVarArgs": false,
+      "annotations": [
+        "@java.lang.Override"
+      ],
+      "documentation": "Implements the {@code m1} method from the {@link I1} interface.\n@param arg1 An Integer argument as specified by the interface."
+    },
+    {
+      "name": "m4",
+      "modifiers": [
+        "public"
+      ],
+      "returnType": "void",
+      "throwsTypes": [
+        "java.io.IOException"
+      ],
+      "isDefault": false,
+      "isVarArgs": false,
+      "annotations": [
+        "@java.lang.Deprecated"
+      ],
+      "documentation": "A public method demonstrating a checked exception.\n This method is {@link Deprecated}.\n@throws java.io.IOException if an I/O error occurs.\n@deprecated This method is deprecated and should not be used."
+    },
+    {
+      "name": "getList",
+      "modifiers": [
+        "public"
+      ],
+      "returnType": "java.util.List<java.lang.String>",
+      "parameters": [
+        {
+          "name": "input",
+          "type": "java.util.List<java.lang.String>"
+        }
+      ],
+      "isDefault": false,
+      "isVarArgs": false,
+      "annotations": [
+        "@io.github.grimch.doclet.sample_module.types.basic.TestAnno"
+      ],
+      "documentation": "Demonstrates a method with a receiver parameter annotation and a local record declaration.\n@param input A list of strings to be processed.\n@return The input list of strings."
+    },
+    {
+      "name": "m5",
+      "modifiers": [
+        "public",
+        "static",
+        "synchronized"
+      ],
+      "returnType": "void",
+      "isDefault": false,
+      "isVarArgs": false,
+      "documentation": "A static synchronized method.\n This method performs a synchronized operation."
+    }
+  ],
+  "documentation": "Represents a basic public non-sealed class demonstrating various field types,\n constructors, methods, and nested types. It implements the {@link I1} interface\n with specific type arguments and {@link java.io.Serializable}.\n <p>\n This class is part of a sealed hierarchy, permitting specific subclasses.\n </p>\n@see I1\n@see java.io.Serializable\n@see C2"
+}

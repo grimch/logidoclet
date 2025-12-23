@@ -1,0 +1,31 @@
+{
+  "name": "C1.InnerC2",
+  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
+  "modifiers": [
+    "protected"
+  ],
+  "extendsType": "java.lang.Object",
+  "constructors": [
+    {
+      "name": "<init>",
+      "modifiers": [
+        "protected"
+      ],
+      "isVarArgs": false,
+      "documentation": "Default constructor."
+    }
+  ],
+  "methods": [
+    {
+      "name": "innerMethod",
+      "modifiers": [
+        "public"
+      ],
+      "returnType": "void",
+      "isDefault": false,
+      "isVarArgs": false,
+      "documentation": "A method within the inner class that accesses the outer class's field."
+    }
+  ],
+  "documentation": "A protected non-static inner class within C1."
+}

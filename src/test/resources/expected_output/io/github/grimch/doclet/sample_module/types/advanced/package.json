@@ -1,0 +1,9 @@
+{
+  "name": "io.github.grimch.doclet.sample_module.types.advanced",
+  "classes": [
+    "C4"
+  ],
+  "interfaces": [
+    "I2"
+  ]
+}

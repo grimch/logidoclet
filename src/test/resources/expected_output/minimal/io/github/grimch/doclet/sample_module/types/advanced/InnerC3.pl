@@ -1,1 +1,0 @@
-class('InnerC3', 'io.github.grimch.doclet.sample_module.types.advanced', [], [], 'null', [], [], [constructor('<init>', [], [], [], [], [], ''), field(outerInstance, [modifier(public)], declared_type('io.github.grimch.doclet.sample_module.types.advanced.C4', []), [], '')], [], '').

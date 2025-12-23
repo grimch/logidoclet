@@ -1,0 +1,69 @@
+{
+  "name": "I1",
+  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
+  "typeParameters": "<T extends java.lang.Number, U>",
+  "modifiers": [
+    "public",
+    "abstract",
+    "sealed"
+  ],
+  "permitsTypes": [
+    "io.github.grimch.doclet.sample_module.types.basic.C1",
+    "io.github.grimch.doclet.sample_module.types.advanced.C4"
+  ],
+  "methods": [
+    {
+      "name": "m1",
+      "modifiers": [
+        "public",
+        "abstract"
+      ],
+      "returnType": "void",
+      "parameters": [
+        {
+          "name": "arg1",
+          "type": "T"
+        }
+      ],
+      "isDefault": false,
+      "isVarArgs": false,
+      "documentation": "An abstract method that takes an argument of type {@code T}.\n@param arg1 The argument of type {@code T}."
+    },
+    {
+      "name": "m2",
+      "modifiers": [
+        "public",
+        "default"
+      ],
+      "returnType": "U",
+      "parameters": [
+        {
+          "name": "arg2",
+          "type": "U"
+        }
+      ],
+      "isDefault": true,
+      "isVarArgs": false,
+      "documentation": "A default method that returns its input argument.\n@param arg2 The argument of type {@code U}.\n@return The input argument {@code arg2}."
+    },
+    {
+      "name": "m3",
+      "typeParameters": "<V>",
+      "modifiers": [
+        "public",
+        "static"
+      ],
+      "returnType": "void",
+      "parameters": [
+        {
+          "name": "arg3",
+          "type": "V"
+        }
+      ],
+      "isDefault": false,
+      "isVarArgs": false,
+      "documentation": "A static generic method that prints its argument to the console.\n@param <V> The type parameter for this method.\n@param arg3 The argument of type {@code V}."
+    }
+  ],
+  "documentation": "Represents a sealed interface demonstrating generics, wildcards, default, and static methods.\n This interface is part of a sealed hierarchy, permitting {@link C1} and {@link io.github.grimch.doclet.sample_module.types.advanced.C4}\n as direct implementations.\n@param <T> The first type parameter, which must extend {@link Number}.\n@param <U> The second type parameter.\n@see C1\n@see io.github.grimch.doclet.sample_module.types.advanced.C4"
+}

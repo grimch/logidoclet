@@ -1,0 +1,118 @@
+{
+  "name": "C4",
+  "packageName": "io.github.grimch.doclet.sample_module.types.advanced",
+  "modifiers": [
+    "public",
+    "non-sealed"
+  ],
+  "extendsType": "java.lang.Object",
+  "implementsTypes": [
+    "io.github.grimch.doclet.sample_module.types.advanced.I2",
+    "io.github.grimch.doclet.sample_module.types.basic.I1<java.lang.Double, java.lang.Boolean>"
+  ],
+  "fields": [
+    {
+      "name": "protectedExternalReference",
+      "modifiers": [
+        "protected"
+      ],
+      "type": "io.github.grimch.doclet.sample_module.types.basic.C1"
+    }
+  ],
+  "constructors": [
+    {
+      "name": "<init>",
+      "modifiers": [
+        "public"
+      ],
+      "isVarArgs": false,
+      "documentation": "Default constructor."
+    }
+  ],
+  "methods": [
+    {
+      "name": "m12",
+      "modifiers": [
+        "protected"
+      ],
+      "returnType": "void",
+      "throwsTypes": [
+        "java.lang.IllegalArgumentException",
+        "java.sql.SQLException"
+      ],
+      "isDefault": false,
+      "isVarArgs": false,
+      "documentation": "A protected method that declares multiple checked exceptions.\n@throws IllegalArgumentException if an illegal argument is provided.\n@throws java.sql.SQLException if a SQL error occurs."
+    },
+    {
+      "name": "m14",
+      "modifiers": [
+        "public",
+        "native"
+      ],
+      "returnType": "void",
+      "isDefault": false,
+      "isVarArgs": false,
+      "documentation": "A public native method."
+    },
+    {
+      "name": "m1",
+      "modifiers": [
+        "public"
+      ],
+      "returnType": "void",
+      "parameters": [
+        {
+          "name": "arg1",
+          "type": "java.lang.Double"
+        }
+      ],
+      "isDefault": false,
+      "isVarArgs": false,
+      "annotations": [
+        "@java.lang.Override"
+      ],
+      "documentation": "Implements the {@code m1} method from the {@link I1} interface.\n@param arg1 A Double argument as specified by the interface."
+    },
+    {
+      "name": "m2",
+      "modifiers": [
+        "public"
+      ],
+      "returnType": "java.lang.Boolean",
+      "parameters": [
+        {
+          "name": "arg2",
+          "type": "java.lang.Boolean"
+        }
+      ],
+      "isDefault": false,
+      "isVarArgs": false,
+      "annotations": [
+        "@java.lang.Override"
+      ],
+      "documentation": "Implements the {@code m2} method from the {@link I1} interface.\n@param arg2 A Boolean argument as specified by the interface.\n@return The input argument {@code arg2}."
+    },
+    {
+      "name": "m10",
+      "typeParameters": "<K extends java.lang.Comparable<K>>",
+      "modifiers": [
+        "public"
+      ],
+      "returnType": "K",
+      "parameters": [
+        {
+          "name": "list",
+          "type": "java.util.List<? extends java.lang.Number>"
+        }
+      ],
+      "throwsTypes": [
+        "java.io.FileNotFoundException"
+      ],
+      "isDefault": false,
+      "isVarArgs": false,
+      "documentation": "A generic method with complex bounds and a wildcard type.\n Implements the {@code m10} method from the {@link I2} interface.\n@param <K> The type parameter, which must extend {@link Comparable} of itself.\n@param list A list of numbers, where elements extend {@link Number}.\n@return A value of type {@code K}.\n@throws FileNotFoundException if a file is not found."
+    }
+  ],
+  "documentation": "Default constructor."
+}

@@ -23,11 +23,12 @@
  */
 package io.github.grimch.doclet;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Set;
 
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
 import javax.tools.DocumentationTool;
 
@@ -39,6 +40,7 @@ import jdk.javadoc.doclet.Reporter;
 public class LogiDoclet implements Doclet {
     private Reporter reporter;
     private boolean prettyPrint = false;
+    private Path outputDirectory;
 
     /**
      * Initializes the doclet with the given locale and reporter.
@@ -74,63 +76,100 @@ public class LogiDoclet implements Doclet {
     @Override
     public Set<? extends Doclet.Option> getSupportedOptions() {
         return Set.of(
-                new Option() { // New Option for prettyPrint
-                    @Override
-                    public int getArgumentCount() { return 1; }
+            new Option() {
+                @Override
+                public int getArgumentCount() {
+                    return 1;
+                }
 
-                    @Override
-                    public String getDescription() {
-                        return "Format Prolog output.";
-                    }
+                @Override
+                public String getDescription() {
+                    return "Output directory for Prolog facts.";
+                }
 
-                    @Override
-                    public Option.Kind getKind() {
-                        return Option.Kind.STANDARD;
-                    }
+                @Override
+                public Option.Kind getKind() {
+                    return Option.Kind.STANDARD;
+                }
 
-                    @Override
-                    public java.util.List<String> getNames() {
-                        return java.util.List.of("-prettyPrint");
-                    }
+                @Override
+                public java.util.List<String> getNames() {
+                    return java.util.List.of("-d");
+                }
 
-                    @Override
-                    public String getParameters() {
-                        return "<boolean>"; // No parameters
-                    }
+                @Override
+                public String getParameters() {
+                    return "<directory>";
+                }
 
-                    @Override
-                    public boolean process(String option, java.util.List<String> arguments) {
-                        if (arguments != null && arguments.size() == 1) {
-                            prettyPrint = Boolean.valueOf(arguments.get(0));
-                            return true;
-                        }
-                        reporter.print(Diagnostic.Kind.ERROR, "Option -prettyPrint requires a boolean argument.");
-                        return false;
-                    }
-                },
-
-                new Option() { // -no-fonts option to please Gradle
-                    @Override
-                    public int getArgumentCount() { return 0; }
-
-                    @Override
-                    public String getDescription() { return "-no-fonts dummy for Gradle"; }
-
-                    @Override
-                    public Option.Kind getKind() { return Doclet.Option.Kind.STANDARD; }
-
-                    @Override
-                    public java.util.List<String> getNames() { return java.util.List.of("-no-fonts"); }
-
-                    @Override
-                    public String getParameters() { return ""; }
-
-                    @Override
-                    public boolean process(String option, java.util.List<String> arguments) {
-                        reporter.print(Diagnostic.Kind.WARNING, "ignoring option: " + option);
+                @Override
+                public boolean process(String option, java.util.List<String> arguments) {
+                    if (arguments != null && arguments.size() == 1) {
+                        outputDirectory = Paths.get(arguments.get(0));
                         return true;
                     }
+                    reporter.print(Diagnostic.Kind.ERROR, "Option -d requires a directory argument.");
+                    return false;
                 }
+            },
+
+            new Option() { // New Option for prettyPrint
+                @Override
+                public int getArgumentCount() { return 1; }
+
+                @Override
+                public String getDescription() {
+                    return "Format Prolog output.";
+                }
+
+                @Override
+                public Option.Kind getKind() {
+                    return Option.Kind.STANDARD;
+                }
+
+                @Override
+                public java.util.List<String> getNames() {
+                    return java.util.List.of("-prettyPrint");
+                }
+
+                @Override
+                public String getParameters() {
+                    return "<boolean>"; // No parameters
+                }
+
+                @Override
+                public boolean process(String option, java.util.List<String> arguments) {
+                    if (arguments != null && arguments.size() == 1) {
+                        prettyPrint = Boolean.valueOf(arguments.get(0));
+                        return true;
+                    }
+                    reporter.print(Diagnostic.Kind.ERROR, "Option -prettyPrint requires a boolean argument.");
+                    return false;
+                }
+            },
+
+            new Option() { // -no-fonts option to please Gradle
+                @Override
+                public int getArgumentCount() { return 0; }
+
+                @Override
+                public String getDescription() { return "-no-fonts dummy for Gradle"; }
+
+                @Override
+                public Option.Kind getKind() { return Doclet.Option.Kind.STANDARD; }
+
+                @Override
+                public java.util.List<String> getNames() { return java.util.List.of("-no-fonts"); }
+
+                @Override
+                public String getParameters() { return ""; }
+
+                @Override
+                public boolean process(String option, java.util.List<String> arguments) {
+                    reporter.print(Diagnostic.Kind.WARNING, "ignoring option: " + option);
+                    return true;
+                }
+            }
         );
     }
 
@@ -147,7 +186,7 @@ public class LogiDoclet implements Doclet {
     @Override
     public boolean run(DocletEnvironment environment) {
         DocWriter docWriter =
-            new JsonDocWriter.Builder(environment.getJavaFileManager())
+            new JsonDocWriter.Builder(outputDirectory)
                 .prettyPrint(prettyPrint)
                 .build();
 

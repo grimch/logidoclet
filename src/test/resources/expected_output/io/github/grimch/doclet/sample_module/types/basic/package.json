@@ -1,0 +1,18 @@
+{
+  "name": "io.github.grimch.doclet.sample_module.types.basic",
+  "classes": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "interfaces": [
+    "I1"
+  ],
+  "enums": [
+    "E1"
+  ],
+  "records": [
+    "R1",
+    "R2"
+  ]
+}

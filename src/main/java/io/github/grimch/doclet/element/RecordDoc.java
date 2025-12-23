@@ -5,6 +5,7 @@ import java.util.List;
 public record RecordDoc(
     String name,
     String packageName,
+    String typeParameters,
     List<String> modifiers,
     String extendsType,
     List<String> implementsTypes,

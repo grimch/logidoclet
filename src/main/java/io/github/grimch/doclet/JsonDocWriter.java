@@ -7,19 +7,20 @@ import io.github.grimch.doclet.element.PackageListDoc;
 import io.github.grimch.doclet.element.PackageDoc;
 import io.github.grimch.doclet.element.TypeDoc;
 
-import javax.tools.DocumentationTool;
-import javax.tools.FileObject;
-import javax.tools.JavaFileManager;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class JsonDocWriter implements DocWriter {
     public final static String DEFAULT_PACKAGE_SUMMARY_FILE_NAME = "package";
     public final static String DEFAULT_PACKAGE_INDEX_DOC_FILE_NAME = "package_index";
-    public final static String DEFAULT_FILE_SUFFIX = ".json";
+    public final static String DEFAULT_FILE_SUFFIX = "json";
 
-    private final JavaFileManager fileManager;
+    private final Path outputDirectory;
     private final String packageSummaryFileName;
     private final String packageIndexFileName;
     private final String fileSuffix;
@@ -28,7 +29,7 @@ public class JsonDocWriter implements DocWriter {
 
     // Private constructor used by the Builder
     private JsonDocWriter(Builder builder) {
-        this.fileManager = builder.fileManager;
+        this.outputDirectory = builder.outputDirectory;
         this.packageSummaryFileName = builder.packageSummaryFileName;
         this.packageIndexFileName = builder.packageIndexFileName;
         this.fileSuffix = builder.fileSuffix;
@@ -39,18 +40,20 @@ public class JsonDocWriter implements DocWriter {
         if (this.prettyPrint) {
             gsonBuilder.setPrettyPrinting();
         }
-        this.gson = gsonBuilder.create();
+        this.gson = gsonBuilder
+            .disableHtmlEscaping()
+            .create();
     }
 
     public static class Builder {
-        private final JavaFileManager fileManager; // Mandatory
         private String packageSummaryFileName = DEFAULT_PACKAGE_SUMMARY_FILE_NAME;
         private String packageIndexFileName = DEFAULT_PACKAGE_INDEX_DOC_FILE_NAME;
         private String fileSuffix = DEFAULT_FILE_SUFFIX;
         private boolean prettyPrint = false;
+        private final Path outputDirectory;
 
-        public Builder(JavaFileManager fileManager) {
-            this.fileManager = Objects.requireNonNull(fileManager, "FileManager cannot be null");
+        public Builder(Path outputDirectory) {
+            this.outputDirectory = Objects.requireNonNull(outputDirectory, "Output directory cannot be null");
         }
 
         public Builder packageSummaryFileName(String name) {
@@ -79,15 +82,18 @@ public class JsonDocWriter implements DocWriter {
     }
 
     private void writeDoc(Object doc, String packageName, String fileName) {
+        String[] parts = packageName.split("\\.");
+        Path packageDir = outputDirectory.resolve(Path.of(parts[0], Arrays.copyOfRange(parts, 1, parts.length)));
+        writeDoc(doc, packageDir, fileName);
+    }
+
+    private void writeDoc(Object doc, Path packageDir, String fileName) {
         try {
-            FileObject fileObject = fileManager.getFileForOutput(
-                DocumentationTool.Location.DOCUMENTATION_OUTPUT,
-                packageName,
-                String.format("%s.%s", fileName, fileSuffix),
-                null
-            );
-            try (Writer out = fileObject.openWriter()) {
+            Files.createDirectories(packageDir);
+            Path filePath = packageDir.resolve(String.format("%s.%s", fileName, fileSuffix));
+            try (Writer out = new PrintWriter(Files.newBufferedWriter(filePath))) {
                 gson.toJson(doc, out);
+                System.out.println();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -102,6 +108,6 @@ public class JsonDocWriter implements DocWriter {
 
     }
     public void writeTypeDoc(TypeDoc typeDoc) {
-        writeDoc(typeDoc, typeDoc.name(), typeDoc.packageName());
+        writeDoc(typeDoc, typeDoc.packageName(), typeDoc.name());
     }
 }

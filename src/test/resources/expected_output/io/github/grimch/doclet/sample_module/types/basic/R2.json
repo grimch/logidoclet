@@ -1,0 +1,96 @@
+{
+  "name": "R2",
+  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
+  "typeParameters": "<X, Y>",
+  "modifiers": [
+    "public",
+    "final"
+  ],
+  "extendsType": "java.lang.Record",
+  "recordComponents": [
+    {
+      "name": "fieldX",
+      "type": "X"
+    },
+    {
+      "name": "fieldY",
+      "type": "Y"
+    }
+  ],
+  "constructors": [
+    {
+      "name": "<init>",
+      "modifiers": [
+        "public"
+      ],
+      "parameters": [
+        {
+          "name": "fieldX",
+          "type": "X"
+        },
+        {
+          "name": "fieldY",
+          "type": "Y"
+        }
+      ],
+      "isVarArgs": false
+    }
+  ],
+  "methods": [
+    {
+      "name": "toString",
+      "modifiers": [
+        "public",
+        "final"
+      ],
+      "returnType": "java.lang.String",
+      "isDefault": false,
+      "isVarArgs": false
+    },
+    {
+      "name": "hashCode",
+      "modifiers": [
+        "public",
+        "final"
+      ],
+      "returnType": "int",
+      "isDefault": false,
+      "isVarArgs": false
+    },
+    {
+      "name": "equals",
+      "modifiers": [
+        "public",
+        "final"
+      ],
+      "returnType": "boolean",
+      "parameters": [
+        {
+          "name": "o",
+          "type": "java.lang.Object"
+        }
+      ],
+      "isDefault": false,
+      "isVarArgs": false
+    },
+    {
+      "name": "fieldX",
+      "modifiers": [
+        "public"
+      ],
+      "returnType": "X",
+      "isDefault": false,
+      "isVarArgs": false
+    },
+    {
+      "name": "fieldY",
+      "modifiers": [
+        "public"
+      ],
+      "returnType": "Y",
+      "isDefault": false,
+      "isVarArgs": false
+    }
+  ],
+  "documentation": "Represents a generic record demonstrating generic record components.\n@param <X> The type for the first field.\n@param <Y> The type for the second field.\n@param fieldX The first field of type {@code X}.\n@param fieldY The second field of type {@code Y}."
+}

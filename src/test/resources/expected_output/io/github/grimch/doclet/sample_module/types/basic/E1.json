@@ -1,0 +1,56 @@
+{
+  "name": "E1",
+  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
+  "modifiers": [
+    "public",
+    "final"
+  ],
+  "fields": [
+    {
+      "name": "description",
+      "modifiers": [
+        "public"
+      ],
+      "type": "java.lang.String"
+    }
+  ],
+  "methods": [
+    {
+      "name": "values",
+      "modifiers": [
+        "public",
+        "static"
+      ],
+      "returnType": "io.github.grimch.doclet.sample_module.types.basic.E1[]",
+      "isDefault": false,
+      "isVarArgs": false
+    },
+    {
+      "name": "valueOf",
+      "modifiers": [
+        "public",
+        "static"
+      ],
+      "returnType": "io.github.grimch.doclet.sample_module.types.basic.E1",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "java.lang.String"
+        }
+      ],
+      "isDefault": false,
+      "isVarArgs": false
+    },
+    {
+      "name": "getCode",
+      "modifiers": [
+        "public"
+      ],
+      "returnType": "int",
+      "isDefault": false,
+      "isVarArgs": false,
+      "documentation": "Returns the code associated with this enum constant.\n@return The integer code."
+    }
+  ],
+  "documentation": "Represents a basic public enum demonstrating enum constants, fields, and constructors."
+}

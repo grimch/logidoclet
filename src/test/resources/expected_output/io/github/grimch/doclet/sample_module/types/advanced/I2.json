@@ -1,0 +1,32 @@
+{
+  "name": "I2",
+  "packageName": "io.github.grimch.doclet.sample_module.types.advanced",
+  "modifiers": [
+    "public",
+    "abstract"
+  ],
+  "methods": [
+    {
+      "name": "m10",
+      "typeParameters": "<K extends java.lang.Comparable<K>>",
+      "modifiers": [
+        "public",
+        "abstract"
+      ],
+      "returnType": "K",
+      "parameters": [
+        {
+          "name": "list",
+          "type": "java.util.List<? extends java.lang.Number>"
+        }
+      ],
+      "throwsTypes": [
+        "java.io.FileNotFoundException"
+      ],
+      "isDefault": false,
+      "isVarArgs": false,
+      "documentation": "A generic method with bounds and a wildcard type.\n@param <K> The type parameter, which must extend {@link Comparable} of itself.\n@param list A list of numbers, where elements extend {@link Number}.\n@return A value of type {@code K}.\n@throws FileNotFoundException if a file is not found."
+    }
+  ],
+  "documentation": "Represents a non-sealed interface demonstrating a generic method with complex bounds\n and a private interface method (Java 9+ feature)."
+}

@@ -1,0 +1,32 @@
+{
+  "name": "C1.StaticNestedC1",
+  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
+  "modifiers": [
+    "public",
+    "static"
+  ],
+  "extendsType": "java.lang.Object",
+  "constructors": [
+    {
+      "name": "<init>",
+      "modifiers": [
+        "public"
+      ],
+      "isVarArgs": false,
+      "documentation": "Default constructor."
+    }
+  ],
+  "methods": [
+    {
+      "name": "getValue",
+      "modifiers": [
+        "public"
+      ],
+      "returnType": "int",
+      "isDefault": false,
+      "isVarArgs": false,
+      "documentation": "Returns the value of this nested class.\n@return The integer value."
+    }
+  ],
+  "documentation": "A public static nested class within C1."
+}

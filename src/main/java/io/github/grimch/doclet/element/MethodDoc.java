@@ -4,6 +4,7 @@ import java.util.List;
 
 public record MethodDoc(
     String name,
+    String typeParameters,
     List<String> modifiers,
     String returnType,
     List<VariableDoc> parameters,

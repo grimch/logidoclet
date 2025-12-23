@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Integration test for the {@link LogiDoclet}.
  * <p>
  * This test runs the Javadoc tool with the {@code LogiDoclet} enabled on a sample
- * Java module located in the test resources. It then compares the generated Prolog
+ * Java module located in the test resources. It then compares the generated
  * output against a set of expected files to ensure the doclet is producing the
  * correct, structured representation of the source code.
  */
@@ -63,7 +63,6 @@ public class LogiDocletTest {
                 files.sorted(java.util.Comparator.reverseOrder()).map(Path::toFile).forEach(java.io.File::delete);
             }
         }
-
     }
 
     /**
@@ -90,7 +89,7 @@ public class LogiDocletTest {
                 "-sourcepath", "src/test/resources/sample_module",
                 "-subpackages",  "io.github.grimch.doclet.sample_module"
         };
-        testDoclet(args, "full");
+        testDoclet(args);
     }
 
     /**
@@ -101,7 +100,7 @@ public class LogiDocletTest {
      *     <li>Invokes the system's {@link DocumentationTool} (javadoc) with the {@code LogiDoclet}.</li>
      *     <li>Specifies the source path to a sample module and the packages to process.</li>
      *     <li>Asserts that the javadoc tool execution completes successfully (exit code 0).</li>
-     *     <li>Recursively walks the directory of expected Prolog files and compares each file
+     *     <li>Recursively walks the directory of expected output files and compares each file
      *         line-by-line with its corresponding actual generated file.</li>
      *     <li>Asserts that the contents of the actual and expected files are identical.</li>
      * </ol>
@@ -114,13 +113,12 @@ public class LogiDocletTest {
      * </ol>
      * @throws IOException if an error occurs during file I/O operations (e.g., reading or deleting files).
      */
-    private void testDoclet(String[] args, String mode) throws IOException {
+    private void testDoclet(String[] args) throws IOException {
         DocumentationTool tool = ToolProvider.getSystemDocumentationTool();
         int result = tool.run(null, null, null, args);
         assertEquals(0, result, "Javadoc tool execution failed");
 
-        Path expectedDir = Paths.get("src/test/resources/expected_output/" + mode);
-        Path actualDir = outputDir.resolve(mode);
+        Path expectedDir = Paths.get("src/test/resources/expected_output/");
 
         try (Stream<Path> expectedFiles = Files.walk(expectedDir)) {
             expectedFiles
@@ -128,7 +126,7 @@ public class LogiDocletTest {
                     .forEach(expectedFile -> {
                         try {
                             Path relativePath = expectedDir.relativize(expectedFile);
-                            Path actualFile = actualDir.resolve(relativePath);
+                            Path actualFile = outputDir.resolve(relativePath);
                             List<String> expectedLines = Files.readAllLines(expectedFile).stream()
                                     .map(String::trim)
                                     .filter(s -> !s.isEmpty())

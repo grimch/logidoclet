@@ -25,7 +25,7 @@ package io.github.grimch.doclet;
 
 import com.sun.source.util.DocTrees;
 import io.github.grimch.doclet.element.*;
-import io.github.grimch.doclet.prolog.*;
+import static io.github.grimch.doclet.util.TypeUtils.*;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
 
@@ -114,7 +114,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
             nullIfEmpty(
                 typeMirrors
                 .stream()
-                .map(TypeMirror::toString)
+                .map(typeMirror -> getFullTypeUsageFQN(typeMirror))
                 .toList()
             );
     }
@@ -143,7 +143,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
         return new VariableDoc(
             element.getSimpleName().toString(),
             getModfiers(element.getModifiers()),
-            element.asType().toString(),
+            getFullTypeUsageFQN(element.asType()),
             getAnnotations(element.getAnnotationMirrors())
         );
     }
@@ -158,7 +158,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                         new VariableDoc(
                             parameter.getSimpleName().toString(),
                             getModfiers(parameter.getModifiers()),
-                            parameter.asType().toString(),
+                            getFullTypeUsageFQN(parameter.asType()),
                             getAnnotations(parameter.getAnnotationMirrors())
                         )
                     )
@@ -213,7 +213,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
     public Pair<ElementKind, String> visitType(TypeElement e, Void p) {
         String qualifiedTypeName = e.getQualifiedName().toString();
         String packageName = docEnv.getElementUtils().getPackageOf(e).getQualifiedName().toString();
-        String typeName = e.getSimpleName().toString();
+        String typeName = qualifiedTypeName.substring(packageName.length() + 1);
 
         Map<ElementKind, List<Object>> groupedElementKinds = acceptElementChilds(e);
 
@@ -223,8 +223,9 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                     new ClassDoc(
                         typeName,
                         packageName,
+                        getTypeParametersListFQN(e.getTypeParameters()),
                         getModfiers(e.getModifiers()),
-                        e.getSuperclass().toString(),
+                        getFullTypeUsageFQN(e.getSuperclass()),
                         getTypeNames(e.getInterfaces()),
                         convertList(groupedElementKinds.get(CLASS), String.class),
                         convertList(groupedElementKinds.get(INTERFACE), String.class),
@@ -242,8 +243,9 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                     new InterfaceDoc(
                         typeName,
                         packageName,
+                        getTypeParametersListFQN(e.getTypeParameters()),
                         getModfiers(e.getModifiers()),
-                        e.getSuperclass().toString(),
+                        getFullTypeUsageFQN(e.getSuperclass()),
                         getTypeNames(e.getInterfaces()),
                         getTypeNames(e.getPermittedSubclasses()),
                         convertList(groupedElementKinds.get(CLASS), String.class),
@@ -279,8 +281,9 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                     new RecordDoc(
                         typeName,
                         packageName,
+                        getTypeParametersListFQN(e.getTypeParameters()),
                         getModfiers(e.getModifiers()),
-                        e.getSuperclass().toString(),
+                        getFullTypeUsageFQN(e.getSuperclass()),
                         getTypeNames(e.getInterfaces()),
                         convertList(groupedElementKinds.get(CLASS), String.class),
                         convertList(groupedElementKinds.get(INTERFACE), String.class),
@@ -304,10 +307,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                 return null;
             }
         }
-
-        // to do: write out
-        String fullyQualifiedName = e.asType().toString();
-        return new Pair<ElementKind, String>(e.getKind(), fullyQualifiedName.substring(fullyQualifiedName.lastIndexOf('.') + 1));
+        return new Pair<ElementKind, String>(e.getKind(), typeName);
     }
 
     @Override
@@ -317,8 +317,9 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                 return new Pair<>(e.getKind(),
                     new MethodDoc(
                         e.getSimpleName().toString(),
+                        getExecutableSignatureFQN(e),
                         getModfiers(e.getModifiers()),
-                        e.getReturnType().toString(),
+                        getFullTypeUsageFQN(e.getReturnType()),
                         getParameters(e),
                         getTypeNames(e.getThrownTypes()),
                         e.isDefault(),
@@ -374,7 +375,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
             e.getKind(),
             new RecordComponentDoc(
                 e.getSimpleName().toString(),
-                e.asType().toString(),
+                getFullTypeUsageFQN(e.asType()),
                 getElementComment(e)
             )
         );

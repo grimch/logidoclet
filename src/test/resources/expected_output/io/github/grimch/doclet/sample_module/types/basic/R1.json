@@ -1,0 +1,120 @@
+{
+  "name": "R1",
+  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
+  "modifiers": [
+    "public",
+    "final"
+  ],
+  "extendsType": "java.lang.Record",
+  "implementsTypes": [
+    "java.io.Serializable"
+  ],
+  "recordComponents": [
+    {
+      "name": "id",
+      "type": "int"
+    },
+    {
+      "name": "name",
+      "type": "java.lang.String"
+    }
+  ],
+  "fields": [
+    {
+      "name": "MAX_ID",
+      "modifiers": [
+        "public",
+        "static",
+        "final"
+      ],
+      "type": "int"
+    }
+  ],
+  "constructors": [
+    {
+      "name": "<init>",
+      "modifiers": [
+        "public"
+      ],
+      "parameters": [
+        {
+          "name": "id",
+          "type": "int"
+        },
+        {
+          "name": "name",
+          "type": "java.lang.String"
+        }
+      ],
+      "isVarArgs": false,
+      "documentation": "Compact constructor for R1.\n Validates that the ID is not negative.\n@throws IllegalArgumentException if the provided ID is less than 0."
+    }
+  ],
+  "methods": [
+    {
+      "name": "getDisplay",
+      "modifiers": [
+        "public"
+      ],
+      "returnType": "java.lang.String",
+      "isDefault": false,
+      "isVarArgs": false,
+      "documentation": "Returns a formatted string representation of the record's ID and name.\n@return A string in the format \"id: name\"."
+    },
+    {
+      "name": "toString",
+      "modifiers": [
+        "public",
+        "final"
+      ],
+      "returnType": "java.lang.String",
+      "isDefault": false,
+      "isVarArgs": false
+    },
+    {
+      "name": "hashCode",
+      "modifiers": [
+        "public",
+        "final"
+      ],
+      "returnType": "int",
+      "isDefault": false,
+      "isVarArgs": false
+    },
+    {
+      "name": "equals",
+      "modifiers": [
+        "public",
+        "final"
+      ],
+      "returnType": "boolean",
+      "parameters": [
+        {
+          "name": "o",
+          "type": "java.lang.Object"
+        }
+      ],
+      "isDefault": false,
+      "isVarArgs": false
+    },
+    {
+      "name": "id",
+      "modifiers": [
+        "public"
+      ],
+      "returnType": "int",
+      "isDefault": false,
+      "isVarArgs": false
+    },
+    {
+      "name": "name",
+      "modifiers": [
+        "public"
+      ],
+      "returnType": "java.lang.String",
+      "isDefault": false,
+      "isVarArgs": false
+    }
+  ],
+  "documentation": "Represents a public record demonstrating record components, a compact constructor,\n a static field, and an instance method. It implements {@link java.io.Serializable}.\n@param id The unique identifier for the record.\n@param name The name associated with the record."
+}

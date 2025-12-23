@@ -1,1 +1,0 @@
-class('InnerC2', 'io.github.grimch.doclet.sample_module.types.basic', [modifier(protected)], [], 'null', [], [], [constructor('<init>', [modifier(protected)], [], [], [], [], ''), method(innerMethod, [modifier(public)], [], type(no_type, void), [], [], [], '')], [], '').

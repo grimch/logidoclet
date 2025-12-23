@@ -1,0 +1,79 @@
+{
+  "name": "C2",
+  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
+  "typeParameters": "<T extends io.github.grimch.doclet.sample_module.types.basic.C1 & java.io.Serializable>",
+  "modifiers": [
+    "public",
+    "abstract",
+    "sealed"
+  ],
+  "extendsType": "java.lang.Object",
+  "fields": [
+    {
+      "name": "protectedGenericField",
+      "modifiers": [
+        "protected"
+      ],
+      "type": "T"
+    },
+    {
+      "name": "publicGenericList",
+      "modifiers": [
+        "public"
+      ],
+      "type": "java.util.List<T>"
+    }
+  ],
+  "constructors": [
+    {
+      "name": "<init>",
+      "modifiers": [
+        "protected"
+      ],
+      "isVarArgs": false,
+      "documentation": "Default constructor."
+    }
+  ],
+  "methods": [
+    {
+      "name": "m7",
+      "modifiers": [
+        "protected",
+        "abstract"
+      ],
+      "returnType": "void",
+      "isDefault": false,
+      "isVarArgs": false,
+      "documentation": "A protected abstract method that must be implemented by concrete subclasses."
+    },
+    {
+      "name": "m8",
+      "typeParameters": "<L>",
+      "modifiers": [
+        "public"
+      ],
+      "returnType": "void",
+      "parameters": [
+        {
+          "name": "list",
+          "type": "java.util.List<? super io.github.grimch.doclet.sample_module.types.basic.C1>"
+        }
+      ],
+      "isDefault": false,
+      "isVarArgs": false,
+      "documentation": "A generic method demonstrating a wildcard type parameter with a 'super' bound.\n@param <L> A generic type parameter for the method.\n@param list A list whose elements are supertypes of {@link C1}."
+    },
+    {
+      "name": "hiddenStaticMethod",
+      "modifiers": [
+        "public",
+        "static"
+      ],
+      "returnType": "void",
+      "isDefault": false,
+      "isVarArgs": false,
+      "documentation": "A static method used for testing method hiding.\n This method prints a message indicating it's from C2."
+    }
+  ],
+  "documentation": "Represents a sealed abstract generic class with complex type parameter bounds.\n This class demonstrates the use of generics, abstract methods, and method hiding.\n It is part of a sealed hierarchy, permitting only {@link C3} as a direct subclass.\n@param <T> The type parameter, which must extend both {@link C1} and {@link Serializable}.\n@see C1\n@see C3\n@see Serializable"
+}
