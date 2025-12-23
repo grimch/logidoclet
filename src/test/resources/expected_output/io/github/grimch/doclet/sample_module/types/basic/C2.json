@@ -1,13 +1,14 @@
 {
-  "name": "C2",
-  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
-  "typeParameters": "<T extends io.github.grimch.doclet.sample_module.types.basic.C1 & java.io.Serializable>",
-  "modifiers": [
-    "public",
-    "abstract",
-    "sealed"
-  ],
-  "extendsType": "java.lang.Object",
+  "header": {
+    "name": "C2",
+    "typeParameters": "<T extends io.github.grimch.doclet.sample_module.types.basic.C1 & java.io.Serializable>",
+    "modifiers": [
+      "public",
+      "abstract",
+      "sealed"
+    ],
+    "extendsType": "java.lang.Object"
+  },
   "fields": [
     {
       "name": "protectedGenericField",

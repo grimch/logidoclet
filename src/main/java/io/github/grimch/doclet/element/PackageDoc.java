@@ -4,8 +4,8 @@ import java.util.List;
 
 public record PackageDoc(
     String name,
-    List<String> classes,
-    List<String> interfaces,
-    List<String> enums,
-    List<String> records
-) implements NamedDoc {}
+    List<ClassDoc.Header> classes,
+    List<InterfaceDoc.Header> interfaces,
+    List<EnumDoc.Header> enums,
+    List<RecordDoc.Header> records
+) {}

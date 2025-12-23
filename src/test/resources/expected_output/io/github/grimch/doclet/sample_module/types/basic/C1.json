@@ -1,18 +1,32 @@
 {
-  "name": "C1",
-  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
-  "modifiers": [
-    "public",
-    "non-sealed"
-  ],
-  "extendsType": "java.lang.Object",
-  "implementsTypes": [
-    "io.github.grimch.doclet.sample_module.types.basic.I1<java.lang.Integer, java.lang.String>",
-    "java.io.Serializable"
-  ],
+  "header": {
+    "name": "C1",
+    "modifiers": [
+      "public",
+      "non-sealed"
+    ],
+    "extendsType": "java.lang.Object",
+    "implementsTypes": [
+      "io.github.grimch.doclet.sample_module.types.basic.I1<java.lang.Integer, java.lang.String>",
+      "java.io.Serializable"
+    ]
+  },
   "classes": [
-    "C1.StaticNestedC1",
-    "C1.InnerC2"
+    {
+      "name": "C1.StaticNestedC1",
+      "modifiers": [
+        "public",
+        "static"
+      ],
+      "extendsType": "java.lang.Object"
+    },
+    {
+      "name": "C1.InnerC2",
+      "modifiers": [
+        "protected"
+      ],
+      "extendsType": "java.lang.Object"
+    }
   ],
   "fields": [
     {

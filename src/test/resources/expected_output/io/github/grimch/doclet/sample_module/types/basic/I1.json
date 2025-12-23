@@ -1,16 +1,17 @@
 {
-  "name": "I1",
-  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
-  "typeParameters": "<T extends java.lang.Number, U>",
-  "modifiers": [
-    "public",
-    "abstract",
-    "sealed"
-  ],
-  "permitsTypes": [
-    "io.github.grimch.doclet.sample_module.types.basic.C1",
-    "io.github.grimch.doclet.sample_module.types.advanced.C4"
-  ],
+  "header": {
+    "name": "I1",
+    "typeParameters": "<T extends java.lang.Number, U>",
+    "modifiers": [
+      "public",
+      "abstract",
+      "sealed"
+    ],
+    "permitsTypes": [
+      "io.github.grimch.doclet.sample_module.types.basic.C1",
+      "io.github.grimch.doclet.sample_module.types.advanced.C4"
+    ]
+  },
   "methods": [
     {
       "name": "m1",

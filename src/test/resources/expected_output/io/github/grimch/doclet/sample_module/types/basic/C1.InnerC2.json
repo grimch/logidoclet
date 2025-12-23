@@ -1,10 +1,11 @@
 {
-  "name": "C1.InnerC2",
-  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
-  "modifiers": [
-    "protected"
-  ],
-  "extendsType": "java.lang.Object",
+  "header": {
+    "name": "C1.InnerC2",
+    "modifiers": [
+      "protected"
+    ],
+    "extendsType": "java.lang.Object"
+  },
   "constructors": [
     {
       "name": "<init>",

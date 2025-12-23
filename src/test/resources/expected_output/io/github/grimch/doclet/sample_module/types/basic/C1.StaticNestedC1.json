@@ -1,11 +1,12 @@
 {
-  "name": "C1.StaticNestedC1",
-  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
-  "modifiers": [
-    "public",
-    "static"
-  ],
-  "extendsType": "java.lang.Object",
+  "header": {
+    "name": "C1.StaticNestedC1",
+    "modifiers": [
+      "public",
+      "static"
+    ],
+    "extendsType": "java.lang.Object"
+  },
   "constructors": [
     {
       "name": "<init>",

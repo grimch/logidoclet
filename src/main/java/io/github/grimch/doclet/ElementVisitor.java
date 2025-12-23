@@ -193,24 +193,23 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
     public Void visitPackage(PackageElement e, Void p) {
         String packageName = e.getQualifiedName().toString();
         if (!internalPackageNames.contains(packageName)) {
-            Map<ElementKind, List<String>> groupedElementKinds = acceptElementChilds(e);
+            Map<ElementKind, List<Object>> groupedElementKinds = acceptElementChilds(e);
             docWriter.writePackageDoc(
                 new PackageDoc(
                     packageName,
-                    groupedElementKinds.get(CLASS),
-                    groupedElementKinds.get(INTERFACE),
-                    groupedElementKinds.get(ENUM),
-                    groupedElementKinds.get(RECORD)
+                    convertList(groupedElementKinds.get(CLASS), ClassDoc.Header.class),
+                    convertList(groupedElementKinds.get(INTERFACE), InterfaceDoc.Header.class),
+                    convertList(groupedElementKinds.get(ENUM), EnumDoc.Header.class),
+                    convertList(groupedElementKinds.get(RECORD), RecordDoc.Header.class)
                 )
             );
             packageList.add(packageName);
         }
         return null;
-
     }
 
     @Override
-    public Pair<ElementKind, String> visitType(TypeElement e, Void p) {
+    public Pair<ElementKind, ? extends Object> visitType(TypeElement e, Void p) {
         String qualifiedTypeName = e.getQualifiedName().toString();
         String packageName = docEnv.getElementUtils().getPackageOf(e).getQualifiedName().toString();
         String typeName = qualifiedTypeName.substring(packageName.length() + 1);
@@ -218,19 +217,23 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
         Map<ElementKind, List<Object>> groupedElementKinds = acceptElementChilds(e);
 
         switch (e.getKind()) {
-            case CLASS ->
+            case CLASS -> {
+                ClassDoc.Header header =
+                    new ClassDoc.Header(
+                        typeName,
+                        getTypeParametersListFQN(e.getTypeParameters()),
+                        getModfiers(e.getModifiers()),
+                        getFullTypeUsageFQN(e.getSuperclass()),
+                        getTypeNames(e.getInterfaces())
+                    );
                 docWriter.writeTypeDoc(
+                    packageName,
                     new ClassDoc(
-                        typeName,
-                        packageName,
-                        getTypeParametersListFQN(e.getTypeParameters()),
-                        getModfiers(e.getModifiers()),
-                        getFullTypeUsageFQN(e.getSuperclass()),
-                        getTypeNames(e.getInterfaces()),
-                        convertList(groupedElementKinds.get(CLASS), String.class),
-                        convertList(groupedElementKinds.get(INTERFACE), String.class),
-                        convertList(groupedElementKinds.get(ENUM), String.class),
-                        convertList(groupedElementKinds.get(RECORD), String.class),
+                        header,
+                        convertList(groupedElementKinds.get(CLASS), ClassDoc.Header.class),
+                        convertList(groupedElementKinds.get(INTERFACE), InterfaceDoc.Header.class),
+                        convertList(groupedElementKinds.get(ENUM), EnumDoc.Header.class),
+                        convertList(groupedElementKinds.get(RECORD), RecordDoc.Header.class),
                         convertList(groupedElementKinds.get(FIELD), VariableDoc.class),
                         convertList(groupedElementKinds.get(CONSTRUCTOR), ConstructorDoc.class),
                         convertList(groupedElementKinds.get(METHOD), MethodDoc.class),
@@ -238,37 +241,52 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                         getElementComment(e)
                     )
                 );
-            case INTERFACE ->
+                return new Pair<ElementKind, ClassDoc.Header>(e.getKind(), header);
+            }
+            case INTERFACE -> {
+                InterfaceDoc.Header header =
+                    new InterfaceDoc.Header(
+                        typeName,
+                        getTypeParametersListFQN(e.getTypeParameters()),
+                        getModfiers(e.getModifiers()),
+                        getFullTypeUsageFQN(e.getSuperclass()),
+                        getTypeNames(e.getInterfaces()),
+                        getTypeNames(e.getPermittedSubclasses())
+                    );
+
                 docWriter.writeTypeDoc(
+                    packageName,
                     new InterfaceDoc(
-                        typeName,
-                        packageName,
-                        getTypeParametersListFQN(e.getTypeParameters()),
-                        getModfiers(e.getModifiers()),
-                        getFullTypeUsageFQN(e.getSuperclass()),
-                        getTypeNames(e.getInterfaces()),
-                        getTypeNames(e.getPermittedSubclasses()),
-                        convertList(groupedElementKinds.get(CLASS), String.class),
-                        convertList(groupedElementKinds.get(INTERFACE), String.class),
-                        convertList(groupedElementKinds.get(ENUM), String.class),
-                        convertList(groupedElementKinds.get(RECORD), String.class),
+                        header,
+                        convertList(groupedElementKinds.get(CLASS), ClassDoc.Header.class),
+                        convertList(groupedElementKinds.get(INTERFACE), InterfaceDoc.Header.class),
+                        convertList(groupedElementKinds.get(ENUM), EnumDoc.Header.class),
+                        convertList(groupedElementKinds.get(RECORD), RecordDoc.Header.class),
                         convertList(groupedElementKinds.get(FIELD), VariableDoc.class),
                         convertList(groupedElementKinds.get(METHOD), MethodDoc.class),
                         getAnnotations(e.getAnnotationMirrors()),
                         getElementComment(e)
                     )
                 );
-            case ENUM ->
-                docWriter.writeTypeDoc(
-                    new EnumDoc(
+                return new Pair<ElementKind, InterfaceDoc.Header>(e.getKind(), header);
+
+            }
+            case ENUM -> {
+                EnumDoc.Header header =
+                    new EnumDoc.Header(
                         typeName,
-                        packageName,
                         getModfiers(e.getModifiers()),
-                        getTypeNames(e.getInterfaces()),
-                        convertList(groupedElementKinds.get(CLASS), String.class),
-                        convertList(groupedElementKinds.get(INTERFACE), String.class),
-                        convertList(groupedElementKinds.get(ENUM), String.class),
-                        convertList(groupedElementKinds.get(RECORD), String.class),
+                        getTypeNames(e.getInterfaces())
+                    );
+
+                docWriter.writeTypeDoc(
+                    packageName,
+                    new EnumDoc(
+                        header,
+                        convertList(groupedElementKinds.get(CLASS), ClassDoc.Header.class),
+                        convertList(groupedElementKinds.get(INTERFACE), InterfaceDoc.Header.class),
+                        convertList(groupedElementKinds.get(ENUM), EnumDoc.Header.class),
+                        convertList(groupedElementKinds.get(RECORD), RecordDoc.Header.class),
                         convertList(groupedElementKinds.get(FIELD), VariableDoc.class),
                         convertList(groupedElementKinds.get(CONSTRUCTOR), ConstructorDoc.class),
                         convertList(groupedElementKinds.get(METHOD), MethodDoc.class),
@@ -276,19 +294,27 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                         getElementComment(e)
                     )
                 );
+                return new Pair<ElementKind, EnumDoc.Header>(e.getKind(), header);
+            }
             case RECORD -> {
-                docWriter.writeTypeDoc(
-                    new RecordDoc(
+                RecordDoc.Header header =
+                    new RecordDoc.Header(
                         typeName,
-                        packageName,
                         getTypeParametersListFQN(e.getTypeParameters()),
                         getModfiers(e.getModifiers()),
                         getFullTypeUsageFQN(e.getSuperclass()),
-                        getTypeNames(e.getInterfaces()),
-                        convertList(groupedElementKinds.get(CLASS), String.class),
-                        convertList(groupedElementKinds.get(INTERFACE), String.class),
-                        convertList(groupedElementKinds.get(ENUM), String.class),
-                        convertList(groupedElementKinds.get(RECORD), String.class),
+                        getTypeNames(e.getInterfaces())
+                    );
+
+
+                docWriter.writeTypeDoc(
+                    packageName,
+                    new RecordDoc(
+                        header,
+                        convertList(groupedElementKinds.get(CLASS), ClassDoc.Header.class),
+                        convertList(groupedElementKinds.get(INTERFACE), InterfaceDoc.Header.class),
+                        convertList(groupedElementKinds.get(ENUM), EnumDoc.Header.class),
+                        convertList(groupedElementKinds.get(RECORD), RecordDoc.Header.class),
                         e
                             .getRecordComponents()
                             .stream()
@@ -301,13 +327,13 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                         getElementComment(e)
                     )
                 );
+                return new Pair<ElementKind, RecordDoc.Header>(e.getKind(), header);
             }
             default -> {
                 reporter.print(Diagnostic.Kind.WARNING, "Unsupported type kind: " + e.getKind() + " for " + qualifiedTypeName);
                 return null;
             }
         }
-        return new Pair<ElementKind, String>(e.getKind(), typeName);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package io.github.grimch.doclet.element;
 
-public interface NamedDoc {
+import java.util.List;
+
+public interface NamedHeader {
     String name();
 }

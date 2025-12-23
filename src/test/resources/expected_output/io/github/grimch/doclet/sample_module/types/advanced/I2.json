@@ -1,10 +1,11 @@
 {
-  "name": "I2",
-  "packageName": "io.github.grimch.doclet.sample_module.types.advanced",
-  "modifiers": [
-    "public",
-    "abstract"
-  ],
+  "header": {
+    "name": "I2",
+    "modifiers": [
+      "public",
+      "abstract"
+    ]
+  },
   "methods": [
     {
       "name": "m10",

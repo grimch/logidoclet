@@ -1,10 +1,11 @@
 {
-  "name": "E1",
-  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
-  "modifiers": [
-    "public",
-    "final"
-  ],
+  "header": {
+    "name": "E1",
+    "modifiers": [
+      "public",
+      "final"
+    ]
+  },
   "fields": [
     {
       "name": "description",

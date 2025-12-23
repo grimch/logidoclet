@@ -4,4 +4,4 @@ public record RecordComponentDoc(
     String name,
     String type,
     String documentation
-) implements NamedDoc {};
+) {};

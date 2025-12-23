@@ -1,18 +1,81 @@
 {
   "name": "io.github.grimch.doclet.sample_module.types.basic",
   "classes": [
-    "C1",
-    "C2",
-    "C3"
+    {
+      "name": "C1",
+      "modifiers": [
+        "public",
+        "non-sealed"
+      ],
+      "extendsType": "java.lang.Object",
+      "implementsTypes": [
+        "io.github.grimch.doclet.sample_module.types.basic.I1<java.lang.Integer, java.lang.String>",
+        "java.io.Serializable"
+      ]
+    },
+    {
+      "name": "C2",
+      "typeParameters": "<T extends io.github.grimch.doclet.sample_module.types.basic.C1 & java.io.Serializable>",
+      "modifiers": [
+        "public",
+        "abstract",
+        "sealed"
+      ],
+      "extendsType": "java.lang.Object"
+    },
+    {
+      "name": "C3",
+      "modifiers": [
+        "public",
+        "final"
+      ],
+      "extendsType": "io.github.grimch.doclet.sample_module.types.basic.C2<io.github.grimch.doclet.sample_module.types.basic.C1>"
+    }
   ],
   "interfaces": [
-    "I1"
+    {
+      "name": "I1",
+      "typeParameters": "<T extends java.lang.Number, U>",
+      "modifiers": [
+        "public",
+        "abstract",
+        "sealed"
+      ],
+      "permitsTypes": [
+        "io.github.grimch.doclet.sample_module.types.basic.C1",
+        "io.github.grimch.doclet.sample_module.types.advanced.C4"
+      ]
+    }
   ],
   "enums": [
-    "E1"
+    {
+      "name": "E1",
+      "modifiers": [
+        "public",
+        "final"
+      ]
+    }
   ],
   "records": [
-    "R1",
-    "R2"
+    {
+      "name": "R1",
+      "modifiers": [
+        "public",
+        "final"
+      ],
+      "extendsType": "java.lang.Record",
+      "implementsTypes": [
+        "java.io.Serializable"
+      ]
+    },
+    {
+      "name": "R2",
+      "typeParameters": "<X, Y>",
+      "modifiers": [
+        "public",
+        "final"
+      ],
+      "extendsType": "java.lang.Record"
+    }
   ]
 }

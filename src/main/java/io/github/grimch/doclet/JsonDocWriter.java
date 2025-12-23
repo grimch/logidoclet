@@ -107,7 +107,7 @@ public class JsonDocWriter implements DocWriter {
         writeDoc(packageDoc, packageDoc.name(), packageSummaryFileName);
 
     }
-    public void writeTypeDoc(TypeDoc typeDoc) {
-        writeDoc(typeDoc, typeDoc.packageName(), typeDoc.name());
+    public void writeTypeDoc(String packageName, TypeDoc typeDoc) {
+        writeDoc(typeDoc, packageName, typeDoc.header().name());
     }
 }

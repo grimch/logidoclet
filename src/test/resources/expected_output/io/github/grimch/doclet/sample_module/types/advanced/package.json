@@ -1,9 +1,26 @@
 {
   "name": "io.github.grimch.doclet.sample_module.types.advanced",
   "classes": [
-    "C4"
+    {
+      "name": "C4",
+      "modifiers": [
+        "public",
+        "non-sealed"
+      ],
+      "extendsType": "java.lang.Object",
+      "implementsTypes": [
+        "io.github.grimch.doclet.sample_module.types.advanced.I2",
+        "io.github.grimch.doclet.sample_module.types.basic.I1<java.lang.Double, java.lang.Boolean>"
+      ]
+    }
   ],
   "interfaces": [
-    "I2"
+    {
+      "name": "I2",
+      "modifiers": [
+        "public",
+        "abstract"
+      ]
+    }
   ]
 }

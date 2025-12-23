@@ -7,4 +7,4 @@ public record VariableDoc(
     List<String> modifiers,
     String type,
     List<String> annotations
-) implements NamedDoc {};
+) {};

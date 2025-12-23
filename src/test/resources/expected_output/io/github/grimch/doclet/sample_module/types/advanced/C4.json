@@ -1,15 +1,16 @@
 {
-  "name": "C4",
-  "packageName": "io.github.grimch.doclet.sample_module.types.advanced",
-  "modifiers": [
-    "public",
-    "non-sealed"
-  ],
-  "extendsType": "java.lang.Object",
-  "implementsTypes": [
-    "io.github.grimch.doclet.sample_module.types.advanced.I2",
-    "io.github.grimch.doclet.sample_module.types.basic.I1<java.lang.Double, java.lang.Boolean>"
-  ],
+  "header": {
+    "name": "C4",
+    "modifiers": [
+      "public",
+      "non-sealed"
+    ],
+    "extendsType": "java.lang.Object",
+    "implementsTypes": [
+      "io.github.grimch.doclet.sample_module.types.advanced.I2",
+      "io.github.grimch.doclet.sample_module.types.basic.I1<java.lang.Double, java.lang.Boolean>"
+    ]
+  },
   "fields": [
     {
       "name": "protectedExternalReference",

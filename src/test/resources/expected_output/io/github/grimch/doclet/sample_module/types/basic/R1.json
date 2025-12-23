@@ -1,14 +1,15 @@
 {
-  "name": "R1",
-  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
-  "modifiers": [
-    "public",
-    "final"
-  ],
-  "extendsType": "java.lang.Record",
-  "implementsTypes": [
-    "java.io.Serializable"
-  ],
+  "header": {
+    "name": "R1",
+    "modifiers": [
+      "public",
+      "final"
+    ],
+    "extendsType": "java.lang.Record",
+    "implementsTypes": [
+      "java.io.Serializable"
+    ]
+  },
   "recordComponents": [
     {
       "name": "id",

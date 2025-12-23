@@ -1,11 +1,12 @@
 {
-  "name": "C3",
-  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
-  "modifiers": [
-    "public",
-    "final"
-  ],
-  "extendsType": "io.github.grimch.doclet.sample_module.types.basic.C2<io.github.grimch.doclet.sample_module.types.basic.C1>",
+  "header": {
+    "name": "C3",
+    "modifiers": [
+      "public",
+      "final"
+    ],
+    "extendsType": "io.github.grimch.doclet.sample_module.types.basic.C2<io.github.grimch.doclet.sample_module.types.basic.C1>"
+  },
   "methods": [
     {
       "name": "m7",

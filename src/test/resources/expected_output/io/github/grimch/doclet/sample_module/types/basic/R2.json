@@ -1,12 +1,13 @@
 {
-  "name": "R2",
-  "packageName": "io.github.grimch.doclet.sample_module.types.basic",
-  "typeParameters": "<X, Y>",
-  "modifiers": [
-    "public",
-    "final"
-  ],
-  "extendsType": "java.lang.Record",
+  "header": {
+    "name": "R2",
+    "typeParameters": "<X, Y>",
+    "modifiers": [
+      "public",
+      "final"
+    ],
+    "extendsType": "java.lang.Record"
+  },
   "recordComponents": [
     {
       "name": "fieldX",
