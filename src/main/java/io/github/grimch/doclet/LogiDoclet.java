@@ -23,15 +23,9 @@
  */
 package io.github.grimch.doclet;
 
+
 import io.github.grimch.doclet.prolog.DocletPrologWriter;
 import io.github.grimch.doclet.prolog.PrologVisitor;
-import jdk.javadoc.doclet.Doclet;
-import jdk.javadoc.doclet.DocletEnvironment;
-import jdk.javadoc.doclet.Reporter;
-
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,6 +35,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
+import javax.tools.Diagnostic;
+
+import jdk.javadoc.doclet.Doclet;
+import jdk.javadoc.doclet.DocletEnvironment;
+import jdk.javadoc.doclet.Reporter;
+
 
 /**
  * A custom Javadoc Doclet that generates a machine-readable Prolog representation of a Java codebase.
