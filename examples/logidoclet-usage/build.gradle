@@ -50,11 +50,6 @@ tasks.register('logidocletJavadoc', Javadoc) {
     options.doclet = 'io.github.grimch.doclet.LogiDoclet'
 	options.docletpath = configurations.logidoclet.files.asType(List)
 	
-    // Comment out ome of the two lines below to enable either only <minimal> or only  <full> output
-    // options.addStringOption('outputMode', 'mimimal')
-    // options.addStringOption('outputMode', 'full')
     // Pass the prettyPrint flag
-    // Comment out the line below to enable full output
-    // Note: tokenization is more efficient with this disabled
     options.addStringOption('prettyPrint', 'true')
 }
