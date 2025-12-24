@@ -26,6 +26,8 @@ package io.github.grimch.doclet;
 import com.sun.source.util.DocTrees;
 import io.github.grimch.doclet.element.*;
 import static io.github.grimch.doclet.util.TypeUtils.*;
+
+import io.github.grimch.doclet.util.TypeUtils;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
 
@@ -39,9 +41,9 @@ import java.util.stream.Stream;
 
 import static javax.lang.model.element.ElementKind.*;
 
-public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
+public class ElementVisitor extends SimpleElementVisitor14<ElementVisitor.Pair<ElementKind, ? extends Object>, Void> {
 
-    private record Pair<L, R>(L left, R right) {}
+    public record Pair<L, R>(L left, R right) {}
 
     private final DocWriter docWriter;
     private final DocletEnvironment docEnv;
@@ -59,7 +61,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
         this.docWriter = docWriter;
     }
 
-    public static <T extends Collection<?>> T nullIfEmpty(T collection) {
+    private static <T extends Collection<?>> T nullIfEmpty(T collection) {
         return (collection == null || collection.isEmpty()) ? null : collection;
     }
 
@@ -87,19 +89,12 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
             : null;
     }
 
-    private <L, R> Map<L, List<R>> acceptElementChilds(Element element) {
+    Map<ElementKind, List<Object>> acceptElementChildren(Element element) {
         return element.getEnclosedElements()
             .stream()
             .filter(this::isPublicApi)
             .map(child -> child.accept(this, null))
-            .flatMap(obj -> {
-                if (obj instanceof Pair<?, ?> pair) {
-                    @SuppressWarnings("unchecked")
-                    Pair<L, R> castedPair = (Pair<L, R>) pair;
-                    return Stream.of(castedPair);
-                }
-                return Stream.empty();
-            })
+            .filter(pair -> pair != null)
             .collect(Collectors.groupingBy(
                 Pair::left,
                 Collectors.mapping(
@@ -114,7 +109,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
             nullIfEmpty(
                 typeMirrors
                 .stream()
-                .map(typeMirror -> getFullTypeUsageFQN(typeMirror))
+                .map(TypeUtils::getFullTypeUsageFQN)
                 .toList()
             );
     }
@@ -129,7 +124,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
             );
     }
 
-    private List<String> getModfiers(Set<Modifier> modifiers) {
+    private List<String> getModifiers(Set<Modifier> modifiers) {
         return
             nullIfEmpty(
                 modifiers
@@ -142,7 +137,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
     private VariableDoc getVariable(VariableElement element) {
         return new VariableDoc(
             element.getSimpleName().toString(),
-            getModfiers(element.getModifiers()),
+            getModifiers(element.getModifiers()),
             getFullTypeUsageFQN(element.asType()),
             getAnnotations(element.getAnnotationMirrors())
         );
@@ -157,7 +152,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                     .map(parameter ->
                         new VariableDoc(
                             parameter.getSimpleName().toString(),
-                            getModfiers(parameter.getModifiers()),
+                            getModifiers(parameter.getModifiers()),
                             getFullTypeUsageFQN(parameter.asType()),
                             getAnnotations(parameter.getAnnotationMirrors())
                         )
@@ -177,7 +172,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
     }
 
     @Override
-    public Void visitModule(ModuleElement moduleElement, Void p) {
+    public Pair<ElementKind, ? extends Object> visitModule(ModuleElement moduleElement, Void p) {
         moduleElement
             .getDirectives()
             .stream()
@@ -186,14 +181,14 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
             .filter(extendsDirective -> extendsDirective.getPackage() != null && extendsDirective.getTargetModules() != null)
             .map(exportsDirective -> exportsDirective.getPackage().getQualifiedName().toString())
             .forEach(internalPackageNames::add);
-        return null;
+        return new Pair<>(MODULE, null);
     }
 
     @Override
-    public Void visitPackage(PackageElement e, Void p) {
+    public Pair<ElementKind, ? extends Object> visitPackage(PackageElement e, Void p) {
         String packageName = e.getQualifiedName().toString();
         if (!internalPackageNames.contains(packageName)) {
-            Map<ElementKind, List<Object>> groupedElementKinds = acceptElementChilds(e);
+            Map<ElementKind, List<Object>> groupedElementKinds = acceptElementChildren(e);
             docWriter.writePackageDoc(
                 new PackageDoc(
                     packageName,
@@ -204,8 +199,10 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                 )
             );
             packageList.add(packageName);
+            return new Pair<>(PACKAGE, packageName);
+        } else {
+            return new Pair<>(PACKAGE, null);
         }
-        return null;
     }
 
     @Override
@@ -214,7 +211,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
         String packageName = docEnv.getElementUtils().getPackageOf(e).getQualifiedName().toString();
         String typeName = qualifiedTypeName.substring(packageName.length() + 1);
 
-        Map<ElementKind, List<Object>> groupedElementKinds = acceptElementChilds(e);
+        Map<ElementKind, List<Object>> groupedElementKinds = acceptElementChildren(e);
 
         switch (e.getKind()) {
             case CLASS -> {
@@ -222,7 +219,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                     new ClassDoc.Header(
                         typeName,
                         getTypeParametersListFQN(e.getTypeParameters()),
-                        getModfiers(e.getModifiers()),
+                        getModifiers(e.getModifiers()),
                         getFullTypeUsageFQN(e.getSuperclass()),
                         getTypeNames(e.getInterfaces())
                     );
@@ -241,14 +238,14 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                         getElementComment(e)
                     )
                 );
-                return new Pair<ElementKind, ClassDoc.Header>(e.getKind(), header);
+                return new Pair<>(e.getKind(), header);
             }
             case INTERFACE -> {
                 InterfaceDoc.Header header =
                     new InterfaceDoc.Header(
                         typeName,
                         getTypeParametersListFQN(e.getTypeParameters()),
-                        getModfiers(e.getModifiers()),
+                        getModifiers(e.getModifiers()),
                         getFullTypeUsageFQN(e.getSuperclass()),
                         getTypeNames(e.getInterfaces()),
                         getTypeNames(e.getPermittedSubclasses())
@@ -268,14 +265,14 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                         getElementComment(e)
                     )
                 );
-                return new Pair<ElementKind, InterfaceDoc.Header>(e.getKind(), header);
+                return new Pair<>(e.getKind(), header);
 
             }
             case ENUM -> {
                 EnumDoc.Header header =
                     new EnumDoc.Header(
                         typeName,
-                        getModfiers(e.getModifiers()),
+                        getModifiers(e.getModifiers()),
                         getTypeNames(e.getInterfaces())
                     );
 
@@ -294,14 +291,14 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                         getElementComment(e)
                     )
                 );
-                return new Pair<ElementKind, EnumDoc.Header>(e.getKind(), header);
+                return new Pair<>(e.getKind(), header);
             }
             case RECORD -> {
                 RecordDoc.Header header =
                     new RecordDoc.Header(
                         typeName,
                         getTypeParametersListFQN(e.getTypeParameters()),
-                        getModfiers(e.getModifiers()),
+                        getModifiers(e.getModifiers()),
                         getFullTypeUsageFQN(e.getSuperclass()),
                         getTypeNames(e.getInterfaces())
                     );
@@ -318,7 +315,14 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                         e
                             .getRecordComponents()
                             .stream()
-                            .map(component -> ((Pair<ElementKind, RecordComponentDoc>) component.accept(this, null)).right())
+                            .map(component -> {
+                                Object o = component.accept(this, null);
+                                if (o instanceof Pair pair && pair.right() instanceof RecordComponentDoc recordComponentDoc) {
+                                    return recordComponentDoc;
+                                } else {
+                                    throw new ClassCastException(String.format("Cannot cast %s to Pair<ElementKind, RecordComponentDoc>.", o.getClass()));
+                                }
+                            })
                             .toList(),
                         convertList(groupedElementKinds.get(FIELD), VariableDoc.class),
                         convertList(groupedElementKinds.get(CONSTRUCTOR), ConstructorDoc.class),
@@ -327,7 +331,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                         getElementComment(e)
                     )
                 );
-                return new Pair<ElementKind, RecordDoc.Header>(e.getKind(), header);
+                return new Pair<>(e.getKind(), header);
             }
             default -> {
                 reporter.print(Diagnostic.Kind.WARNING, "Unsupported type kind: " + e.getKind() + " for " + qualifiedTypeName);
@@ -344,7 +348,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                     new MethodDoc(
                         e.getSimpleName().toString(),
                         getExecutableSignatureFQN(e),
-                        getModfiers(e.getModifiers()),
+                        getModifiers(e.getModifiers()),
                         getFullTypeUsageFQN(e.getReturnType()),
                         getParameters(e),
                         getTypeNames(e.getThrownTypes()),
@@ -360,7 +364,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
                 return new Pair<>(e.getKind(),
                     new ConstructorDoc(
                         e.getSimpleName().toString(),
-                        getModfiers(e.getModifiers()),
+                        getModifiers(e.getModifiers()),
                         getParameters(e),
                         getTypeNames(e.getThrownTypes()),
                         e.isVarArgs(),
@@ -382,7 +386,7 @@ public class ElementVisitor extends SimpleElementVisitor14<Object, Void> {
     public Pair<ElementKind, VariableDoc> visitVariable(VariableElement e, Void p) {
         switch (e.getKind()) {
             case FIELD -> {
-                return new Pair(e.getKind(), getVariable(e));
+                return new Pair<>(e.getKind(), getVariable(e));
             }
             case ENUM_CONSTANT, PARAMETER, RESOURCE_VARIABLE, LOCAL_VARIABLE, EXCEPTION_PARAMETER -> {
                 // These are handled in other visit methods or ignored.
