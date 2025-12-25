@@ -94,7 +94,7 @@ public class ElementVisitor extends SimpleElementVisitor14<ElementVisitor.Pair<E
             .stream()
             .filter(this::isPublicApi)
             .map(child -> child.accept(this, null))
-            .filter(pair -> pair != null)
+            .filter(Objects::nonNull)
             .collect(Collectors.groupingBy(
                 Pair::left,
                 Collectors.mapping(
